@@ -211,7 +211,7 @@ rule uncallable_regions:
         """
         bedtools complement \
             -i <(bedtools merge -i {input.windows}) \
-             -g <(cat {input.fai} | sort) \
+             -g <(cat {input.fai} | sort -k 1,1 -k2,2n ) \
             | gzip -c > {output}
         """
 
