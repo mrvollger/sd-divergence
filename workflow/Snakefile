@@ -1,6 +1,7 @@
 import os
 import sys
 import math
+import pandas as pd
 from snakemake.utils import min_version
 
 min_version("6.0")
@@ -14,6 +15,11 @@ report: "report/workflow.rst"
 
 configfile: "config/config.yaml"
 
+
+tbl = pd.read_csv(config["manifest"], sep="\t")
+tbl.set_index("sample", inplace=True)
+fai = config["ref"] + ".fai"
+assert os.path.exists(fai), f"{fai} not found"
 
 TEMP_DIR = config.pop("tempdir", "temp")
 if TEMP_DIR != "temp":
@@ -30,32 +36,76 @@ if TEMP_DIR != "temp":
 
 rule all:
     input:
-        [],
+        coverage="results/haplotype_coverage.bed.gz",
 
 
-rule RepeatMasker:
+rule make_windows:
     input:
-        fasta="a.fasta",
+        fai=fai,
+        annotation_files=config["annotation_files"].values(),
     output:
-        out="a.out",
-    resources:
-        mem=config.get("mem", 8),
-    threads: config.get("threads", 8)
+        "results/windows.bed.gz",
+    log:
+        "logs/windows.log",
     conda:
         "envs/env.yml"
-    log:
-        "rm.out.log",
     params:
-        opts=config.get("RepeatMaskerOptions", "-s -xsamll -e ncbi"),
-        species=config.get("RepeatMaskerSpecies", "human"),
+        window_size=config["window_size"],
+        step_size=config["step_size"],
+        annotation_names="\t".join(config["annotation_files"].keys()),
+    threads: 1
     shell:
         """
-        RepeatMasker \
-            -s \
-            -xsmall \
-            -e ncbi \
-            -species {params.species} \
-            -dir $(dirname {input.fasta}) \
-            -pa {threads} \
-            {input.fasta}  2> {log}
+        bedtools makewindows -g {input.fai} -w {params.window_size} -s {params.step_size} \
+            | bedtools sort -i - \
+            | bedtools annotate -i - \
+                -files {input.annotation_files} \
+            | bedtools sort -i - \
+            | sed '1s/^/#chr\\tstart\\tend\\t{params.annotation_names}\\n/' \
+            | gzip -c > {output}
+        """
+
+
+rule syntenic_and_callable:
+    input:
+        callable=lambda w: tbl.loc[w.sm][f"h{w.h}_callable"],
+        aln=lambda w: tbl.loc[w.sm][f"h{w.h}_aln"],
+    output:
+        "results/syntenic_and_callable/{sm}_{h}.bed.gz",
+    log:
+        "logs/syntenic.{sm}_{h}.log",
+    conda:
+        "envs/env.yml"
+    params:
+        min_syntenic_size=config["min_syntenic_size"],
+    threads: 1
+    shell:
+        """
+        bedtools intersect -a {input.callable} \
+            -b <( bedtools sort -i {input.aln} | awk '$3 - $2 >= {params.min_syntenic_size}' ) \
+            | bedtools sort -i - \
+            | bedtools merge -i - \
+            | sed 's/$/\\t{wildcards.sm}_{wildcards.h}/g' \
+            | gzip -c > {output}
+        """
+
+
+rule haplotype_coverage_over_windows:
+    input:
+        windows=rules.make_windows.output,
+        beds=expand(rules.syntenic_and_callable.output, sm=tbl.index, h=[1, 2]),
+    output:
+        "results/haplotype_coverage.bed.gz",
+    log:
+        "logs/haplotype_coverage.log",
+    conda:
+        "envs/env.yml"
+    threads: 1
+    shell:
+        """
+        bedtools coverage -f 0.95 -counts -sorted \
+            -header \
+            -a {input.windows} -b {input.beds} \
+            | sed '1s/$/\\thap_count/' \
+            | gzip -c > {output}
         """

@@ -1,7 +1,8 @@
-sample: "a"
-ref: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/SEDEF/chm13.draft_v1.0_plus38Y_masked.fasta
-sd: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/SEDEF/chm13_v1.1_plus38Y.SDs.bed
-rm: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/Masked/chm13_v1.1_plus38Y_repeatmasker.out.bed
-trf: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/Masked/chm13_v1.1_plus38Y_trf.bed
-manifest: config/manifest.tsv
-
+ref: .test/reference/chm13_v1.1_plus38Y_masked.fasta
+manifest: .test/manifest.tsv
+step_size: 100000
+window_size: 100000
+min_syntenic_size: 1000000
+annotation_files:
+  sd: .test/annotation/chm13_v1.1_plus38Y.SDs.bed.gz
+  cen: .test/annotation/chm13_v1.1_plus38Y.cen.bed.gz
