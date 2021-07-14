@@ -139,12 +139,13 @@ rule annotate_windows:
         HEADER=$(gunzip -c {input.windows} | head -n 1 || :)
         HEADER="${{HEADER}}\t{params.annotation_names}"
         echo $HEADER
-        echo $HEADER | tr ' ' $"\t" | gzip -c > {output}
+        #echo $HEADER | tr ' ' $"\t" | gzip -c > {output}
 
         bedtools annotate -i {input.windows} \
                 -files {input.annotation_files} \
             | bedtools sort -i - \
-            | gzip -c >> {output}
+            | sed "1s/^/${{HEADER}}\\n/" \
+            | gzip -c > {output}
         """
 
 

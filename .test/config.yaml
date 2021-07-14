@@ -1,7 +1,7 @@
 ref: .test/reference/chm13_v1.1_plus38Y_masked.fasta
 manifest: .test/manifest.tsv
 step_size: 100000
-window_size: 100000
+window_size: 200000
 min_syntenic_size: 1000000
 annotation_files:
   sd: .test/annotation/chm13_v1.1_plus38Y.SDs.bed.gz
