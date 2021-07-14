@@ -36,7 +36,8 @@ if TEMP_DIR != "temp":
 
 rule all:
     input:
-        coverage="results/haplotype_coverage.bed.gz",
+        coverage="results/annotated_haplotype_coverage.bed.gz",
+        uncallable="results/uncallable_regions.bed.gz",
 
 
 rule make_windows:
@@ -44,7 +45,7 @@ rule make_windows:
         fai=fai,
         annotation_files=config["annotation_files"].values(),
     output:
-        "results/windows.bed.gz",
+        temp("temp/windows.bed.gz"),
     log:
         "logs/windows.log",
     conda:
@@ -58,10 +59,6 @@ rule make_windows:
         """
         bedtools makewindows -g {input.fai} -w {params.window_size} -s {params.step_size} \
             | bedtools sort -i - \
-            | bedtools annotate -i - \
-                -files {input.annotation_files} \
-            | bedtools sort -i - \
-            | sed '1s/^/#chr\\tstart\\tend\\t{params.annotation_names}\\n/' \
             | gzip -c > {output}
         """
 
@@ -101,11 +98,73 @@ rule haplotype_coverage_over_windows:
     conda:
         "envs/env.yml"
     threads: 1
+    params:
+        names=" ".join(expand("{sm}_{h}", sm=tbl.index, h=[1, 2])),
+        overlap=1 - config["window_size"],  # makes sure bedtools merge only merges the same windows
     shell:
         """
-        bedtools coverage -f 0.95 -counts -sorted \
-            -header \
+        NUM_COL=$(gunzip -c {input.windows} | head -n 1 | awk '{{print NF}}' || :)
+        NAME_COL=$((NUM_COL+1))
+        BOOL_COL=$((NUM_COL+2))
+        echo $NAME_COL $BOOL_COL
+
+        bedtools intersect -f 0.95 -C \
+            -sorted -sortout \
             -a {input.windows} -b {input.beds} \
-            | sed '1s/$/\\thap_count/' \
+            -names {params.names} \
+        | awk -v bool=$BOOL_COL '$bool != 0' \
+        | bedtools merge -i - \
+            -d {params.overlap} \
+            -c $NAME_COL,$BOOL_COL -o distinct,sum \
+        | sed '1s/^/#chr\\tstart\\tend\\thaps\\thap_count\\n/' \
+        | gzip -c > {output}
+        """
+
+
+rule annotate_windows:
+    input:
+        windows=rules.haplotype_coverage_over_windows.output,
+        annotation_files=config["annotation_files"].values(),
+    output:
+        "results/annotated_haplotype_coverage.bed.gz",
+    log:
+        "logs/annotate_windows.log",
+    conda:
+        "envs/env.yml"
+    params:
+        annotation_names="\t".join(config["annotation_files"].keys()),
+    threads: 1
+    shell:
+        """
+        HEADER=$(gunzip -c {input.windows} | head -n 1 || :)
+        HEADER="${{HEADER}}\t{params.annotation_names}"
+        echo $HEADER
+        echo $HEADER | tr ' ' $"\t" | gzip -c > {output}
+
+        bedtools annotate -i {input.windows} \
+                -files {input.annotation_files} \
+            | bedtools sort -i - \
+            | gzip -c >> {output}
+        """
+
+
+rule uncallable_regions:
+    input:
+        fai=fai,
+        windows=rules.annotate_windows.output,
+    output:
+        "results/uncallable_regions.bed.gz",
+    log:
+        "logs/annotate_windows.log",
+    conda:
+        "envs/env.yml"
+    params:
+        annotation_names="\t".join(config["annotation_files"].keys()),
+    threads: 1
+    shell:
+        """
+        bedtools complement \
+            -i <(bedtools merge -i {input.windows}) \
+             -g <(cat {input.fai} | sort) \
             | gzip -c > {output}
         """
