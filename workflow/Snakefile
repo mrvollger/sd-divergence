@@ -38,6 +38,7 @@ rule all:
     input:
         coverage="results/annotated_haplotype_coverage.bed.gz",
         uncallable="results/uncallable_regions.bed.gz",
+        snv="results/snv_count_annotated_haplotype_coverage.bed.gz",
 
 
 rule make_windows:
@@ -84,6 +85,30 @@ rule syntenic_and_callable:
             | bedtools merge -i - \
             | sed 's/$/\\t{wildcards.sm}_{wildcards.h}/g' \
             | gzip -c > {output}
+        """
+
+
+rule filter_snv_by_syntenic:
+    input:
+        snv=lambda w: tbl.loc[w.sm][f"snv"],
+        callable=rules.syntenic_and_callable.output,
+    output:
+        snv="results/syntenic_and_callable/snv_{sm}_{h}.bed.gz",
+    log:
+        "logs/snv_by_syntenic.{sm}_{h}.log",
+    conda:
+        "envs/env.yml"
+    threads: 1
+    shell:
+        """
+        gunzip -c {input.snv} \
+            | awk -F$'\\t' -v pat="h{wildcards.h}|HAP" '$15 ~ pat' \
+            | bedtools intersect -u \
+                -a - \
+                -b <(gunzip -c {input.callable}) \
+                -header \
+            | bedtools sort -i - \
+        | gzip -c > {output}
         """
 
 
@@ -168,4 +193,26 @@ rule uncallable_regions:
             -i <(bedtools merge -i {input.windows}) \
              -g <(cat {input.fai} | sort) \
             | gzip -c > {output}
+        """
+
+
+rule add_snv_to_windows:
+    input:
+        windows=rules.annotate_windows.output,
+        snv=expand(rules.filter_snv_by_syntenic.output, sm=tbl.index, h=[1, 2]),
+    output:
+        "results/snv_count_annotated_haplotype_coverage.bed.gz",
+    log:
+        "logs/snv_count_windows.log",
+    conda:
+        "envs/env.yml"
+    threads: 1
+    shell:
+        """
+        bedtools coverage \
+            -a {input.windows} \
+            -b {input.snv} \
+            -header -counts -sorted \
+        | sed "1s/$/\\tnum_snv\\n/" \
+        | gzip -c > {output}
         """
