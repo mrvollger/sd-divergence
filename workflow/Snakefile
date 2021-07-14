@@ -34,11 +34,15 @@ if TEMP_DIR != "temp":
         shell("ln -s {TEMP_DIR} temp")
 
 
+wildcard_constraints:
+    sm="|".join(tbl.index),
+
+
 rule all:
     input:
-        coverage="results/annotated_haplotype_coverage.bed.gz",
         uncallable="results/uncallable_regions.bed.gz",
         snv="results/snv_count_annotated_haplotype_coverage.bed.gz",
+        all_snv="results/all_snv_exploded.bed.gz",
 
 
 rule make_windows:
@@ -93,7 +97,7 @@ rule filter_snv_by_syntenic:
         snv=lambda w: tbl.loc[w.sm][f"snv"],
         callable=rules.syntenic_and_callable.output,
     output:
-        snv="results/syntenic_and_callable/snv_{sm}_{h}.bed.gz",
+        snv=temp("temp/syntenic_and_callable/snv_{sm}_{h}.bed.gz"),
     log:
         "logs/snv_by_syntenic.{sm}_{h}.log",
     conda:
@@ -107,9 +111,43 @@ rule filter_snv_by_syntenic:
                 -a - \
                 -b <(gunzip -c {input.callable}) \
                 -header \
-            | bedtools sort -i - \
+            | bedtools sort -header -i - \
         | gzip -c > {output}
         """
+
+
+rule merge_filtered_snv_by_syntenic:
+    input:
+        haps=expand(rules.filter_snv_by_syntenic.output, h=[1, 2], allow_missing=True),
+    output:
+        snv="results/syntenic_and_callable/snv_{sm}.bed.gz",
+    log:
+        "logs/merge_filtered_snv_by_syntenic.{sm}.log",
+    conda:
+        "envs/env.yml"
+    threads: 1
+    shell:
+        """
+        gunzip -c {input.haps} \
+            | bedtools sort -header -i - \
+            | uniq \
+            | gzip -c \
+            > {output.snv}
+        """
+
+
+rule explode_snv:
+    input:
+        bed=rules.merge_filtered_snv_by_syntenic.output.snv,
+    output:
+        snv=temp("temp/syntenic_and_callable/snv_explode_{sm}.bed.gz"),
+    log:
+        "logs/explode_snv.{sm}.log",
+    conda:
+        "envs/env.yml"
+    threads: 1
+    script:
+        "scripts/explode_snv.py"
 
 
 rule haplotype_coverage_over_windows:
@@ -117,7 +155,7 @@ rule haplotype_coverage_over_windows:
         windows=rules.make_windows.output,
         beds=expand(rules.syntenic_and_callable.output, sm=tbl.index, h=[1, 2]),
     output:
-        "results/haplotype_coverage.bed.gz",
+        temp("temp/haplotype_coverage.bed.gz"),
     log:
         "logs/haplotype_coverage.log",
     conda:
@@ -171,7 +209,7 @@ rule annotate_windows:
             rules.clean_annotation_files.output, anno=config["annotation_files"].keys()
         ),
     output:
-        "results/annotated_haplotype_coverage.bed.gz",
+        temp("temp/annotated_haplotype_coverage.bed.gz"),
     log:
         "logs/annotate_windows.log",
     conda:
@@ -219,7 +257,7 @@ rule uncallable_regions:
 rule add_snv_to_windows:
     input:
         windows=rules.annotate_windows.output,
-        snv=expand(rules.filter_snv_by_syntenic.output, sm=tbl.index, h=[1, 2]),
+        snv=expand(rules.explode_snv.output.snv, sm=tbl.index),
     output:
         "results/snv_count_annotated_haplotype_coverage.bed.gz",
     log:
@@ -234,5 +272,23 @@ rule add_snv_to_windows:
             -b {input.snv} \
             -header -counts -sorted \
         | sed "1s/$/\\tnum_snv\\n/" \
+        | gzip -c > {output}
+        """
+
+
+rule all_snv:
+    input:
+        snv=expand(rules.explode_snv.output.snv, sm=tbl.index),
+    output:
+        "results/all_snv_exploded.bed.gz",
+    log:
+        "logs/snv_count_windows.log",
+    conda:
+        "envs/env.yml"
+    threads: 1
+    shell:
+        """
+        gunzip -c {input.snv} \
+            | bedtools sort -i - -header \
         | gzip -c > {output}
         """
