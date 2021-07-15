@@ -10,9 +10,6 @@ SDIR = os.path.realpath(os.path.dirname(srcdir("Snakefile")))
 shell.prefix(f"set -eo pipefail;")
 
 
-report: "report/workflow.rst"
-
-
 configfile: "config/config.yaml"
 
 
@@ -35,7 +32,7 @@ if TEMP_DIR != "temp":
 
 
 wildcard_constraints:
-    sm="|".join(tbl.index),
+    sm="|".join(tbl.index) + "|all",
 
 
 rule all:
@@ -46,6 +43,8 @@ rule all:
         filtered_sv_pop_snv=expand(
             "results/syntenic_and_callable/snv_{sm}.bed.gz", sm=tbl.index
         ),
+        cumulative_divergence="results/figures/cumulative_divergence.svg",
+        called_regions="results/figures/callable_space.svg",
 
 
 rule make_windows:
@@ -160,7 +159,7 @@ rule haplotype_coverage_over_windows:
     threads: 1
     params:
         names=" ".join(expand("{sm}_{h}", sm=tbl.index, h=[1, 2])),
-        overlap=1 - config["window_size"], # makes sure bedtools merge only merges the same windows
+        overlap=1 - config["window_size"],  # makes sure bedtools merge only merges the same windows
     shell:
         """
         NUM_COL=$(gunzip -c {input.windows} | head -n 1 | awk '{{print NF}}' || :)
@@ -268,7 +267,7 @@ rule add_snv_to_windows:
             -a {input.windows} \
             -b {input.snv} \
             -header -counts -sorted \
-        | sed "1s/$/\\tnum_snv\\n/" \
+        | sed "1s/$/\\tnum_snv/" \
         | gzip -c > {output}
         """
 
@@ -289,3 +288,35 @@ rule all_snv:
             | bedtools sort -i - -header \
         | gzip -c > {output}
         """
+
+
+rule plot_cumulative_divergence:
+    input:
+        rules.add_snv_to_windows.output,
+    output:
+        report(
+            "results/figures/cumulative_divergence.svg", category="Figures",
+        ),
+    log:
+        "logs/cumulative_divergence.log",
+    conda:
+        "envs/R.yml"
+    threads: 1
+    script:
+        "scripts/divergence_cum.R"
+
+
+rule plot_callable_space:
+    input:
+        expand(rules.syntenic_and_callable.output, sm=tbl.index, h=[1, 2]),
+    output:
+        report(
+            "results/figures/callable_space.svg", category="Figures",
+        ),
+    log:
+        "logs/callable_space.log",
+    conda:
+        "envs/R.yml"
+    threads: 1
+    script:
+        "scripts/called_regions.R"
