@@ -160,7 +160,7 @@ rule haplotype_coverage_over_windows:
     threads: 1
     params:
         names=" ".join(expand("{sm}_{h}", sm=tbl.index, h=[1, 2])),
-        overlap=1 - config["window_size"],  # makes sure bedtools merge only merges the same windows
+        overlap=1 - config["window_size"], # makes sure bedtools merge only merges the same windows
     shell:
         """
         NUM_COL=$(gunzip -c {input.windows} | head -n 1 | awk '{{print NF}}' || :)

@@ -23,4 +23,3 @@ implode.loc[(implode["GT"] == "1|.;.|1"), "GT"] = "1|1"
 implode = implode.loc[:, df.columns]
 
 implode.to_csv(snakemake.output.snv, sep="\t", compression="gzip", index=False)
-
