@@ -5,19 +5,27 @@ infile <- snakemake@input[[1]]
 outfile <- snakemake@output[[1]]
 df <- fread(infile)
 
+annotations <- colnames(df)[7:ncol(df)]
+df$region <- "Other"
+for (anno in annotations) {
+    df[df$region == "Other" & df[[anno]] > 0.90]$region <- anno
+}
+df[SD < 0.2 & Sat < 0.2 && region == "Other"]$region <- "Unique"
+
+chrX <- copy(df[df[["#chr"]] == "chrX"])
+chrX$region <- "chrX"
+df <- rbind(df, chrX)
+
+pal <- COLORS[unique(df$region)]
+df$region <- factor(df$region)
+
 df <- df %>%
     mutate(snv_per_kbp = 1000 * num_snv / (hap_count * (end - start))) %>%
     filter(snv_per_kbp > 0) %>%
     data.table()
 
-colnames(df)
 
-df$region <- "Unique"
-df$region[df$SD >= 0.9 & df$Sat < 0.7] <- "SD"
-df$region[df$Sat > 0.7] <- "Sat"
-df$region <- factor(df$region)
 
-pal <- COLORS
 fakeadd <- 0.1
 p <- ggplot() +
     stat_ecdf(

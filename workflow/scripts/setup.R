@@ -20,13 +20,16 @@ RED <- "#af0404"
 BLUE <- "#3282b8"
 BLACK <- "#000000"
 PURPLE <- "#6402a1"
+GREEN <- "#0d7a0d"
 COLOR1 <- RED
 COLOR2 <- GRAY
 COLORS <- c(
     SD = COLOR1,
     Unique = COLOR2,
     Sat = PURPLE,
-    Cen = PURPLE
+    Cen = PURPLE,
+    chrX = GREEN,
+    Other = "grey"
 )
 
 
