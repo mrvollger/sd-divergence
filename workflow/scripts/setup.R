@@ -8,6 +8,8 @@ library(plotly, quietly = TRUE)
 library(glue, quietly = TRUE)
 library(karyoploteR, quietly = TRUE)
 library(GenomicRanges, quietly = TRUE)
+library(tidyr)
+library(ggforce)
 
 # ## Load Data
 
@@ -21,3 +23,11 @@ BLACK <- "#000000"
 COLOR1 <- RED
 COLOR2 <- GRAY
 COLORS <- c(SD = COLOR1, Unique = COLOR2)
+
+
+get_num_bp <- function(df) {
+    gr <- GenomicRanges::reduce(toGRanges(as.data.table(df)))
+    as.data.table(
+        sum(width(gr))
+    )
+}

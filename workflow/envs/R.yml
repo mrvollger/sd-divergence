@@ -20,4 +20,5 @@ dependencies:
   - r-svglite
   - bioconductor-genomicranges
   - bioconductor-karyoploter
+  - r-ggforce
   

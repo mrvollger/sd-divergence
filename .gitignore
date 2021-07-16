@@ -1,7 +1,8 @@
 .vscode/**
+**.code-workspace
 .snakemake/**
 results/**
 logs/**
-.snakemake/**
-**.code-workspace
 temp/**
+.Rhistory
+Rplots.pdf
