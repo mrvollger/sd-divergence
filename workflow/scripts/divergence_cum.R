@@ -1,5 +1,6 @@
 source("workflow/scripts/setup.R")
 
+infile <- "results/snv_count_annotated_haplotype_coverage.bed.gz"
 infile <- snakemake@input[[1]]
 outfile <- snakemake@output[[1]]
 df <- fread(infile)
@@ -8,9 +9,12 @@ df <- df %>%
     mutate(snv_per_kbp = 1000 * num_snv / (hap_count * (end - start))) %>%
     filter(snv_per_kbp > 0) %>%
     data.table()
+
+colnames(df)
+
 df$region <- "Unique"
-df$region[df$sd >= 0.9 & df$cen < 0.7] <- "SD"
-df$region[df$cen > 0.7] <- "CenSat"
+df$region[df$SD >= 0.9 & df$Sat < 0.7] <- "SD"
+df$region[df$Sat > 0.7] <- "Sat"
 df$region <- factor(df$region)
 
 pal <- COLORS

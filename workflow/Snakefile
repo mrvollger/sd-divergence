@@ -10,9 +10,6 @@ SDIR = os.path.realpath(os.path.dirname(srcdir("Snakefile")))
 shell.prefix(f"set -eo pipefail;")
 
 
-configfile: "config/config.yaml"
-
-
 tbl = pd.read_csv(config["manifest"], sep="\t")
 tbl.set_index("sample", inplace=True)
 fai = config["ref"] + ".fai"
@@ -180,6 +177,28 @@ rule haplotype_coverage_over_windows:
         """
 
 
+rule add_snv_to_windows:
+    input:
+        windows=rules.haplotype_coverage_over_windows.output,
+        snv=expand(rules.filter_snv_by_syntenic.output.snv, sm=tbl.index, h=[1, 2]),
+    output:
+        temp("temp/snvs_haplotype_coverage.bed.gz"),
+    log:
+        "logs/snv_count_windows.log",
+    conda:
+        "envs/env.yml"
+    threads: 1
+    shell:
+        """
+        bedtools coverage \
+            -a {input.windows} \
+            -b {input.snv} \
+            -header -counts -sorted \
+        | sed "1s/$/\\tnum_snv/" \
+        | gzip -c > {output}
+        """
+
+
 rule clean_annotation_files:
     input:
         annotation_file=lambda w: config["annotation_files"][w.anno],
@@ -200,12 +219,12 @@ rule clean_annotation_files:
 
 rule annotate_windows:
     input:
-        windows=rules.haplotype_coverage_over_windows.output,
+        windows=rules.add_snv_to_windows.output,
         annotation_files=expand(
             rules.clean_annotation_files.output, anno=config["annotation_files"].keys()
         ),
     output:
-        temp("temp/annotated_haplotype_coverage.bed.gz"),
+        "results/snv_count_annotated_haplotype_coverage.bed.gz",
     log:
         "logs/annotate_windows.log",
     conda:
@@ -218,7 +237,6 @@ rule annotate_windows:
         HEADER=$(gunzip -c {input.windows} | head -n 1 || :)
         HEADER="${{HEADER}}\t{params.annotation_names}"
         echo $HEADER
-        #echo $HEADER | tr ' ' $"\t" | gzip -c > {output}
 
         bedtools annotate -i {input.windows} \
                 -files {input.annotation_files} \
@@ -250,28 +268,6 @@ rule uncallable_regions:
         """
 
 
-rule add_snv_to_windows:
-    input:
-        windows=rules.annotate_windows.output,
-        snv=expand(rules.filter_snv_by_syntenic.output.snv, sm=tbl.index, h=[1, 2]),
-    output:
-        "results/snv_count_annotated_haplotype_coverage.bed.gz",
-    log:
-        "logs/snv_count_windows.log",
-    conda:
-        "envs/env.yml"
-    threads: 1
-    shell:
-        """
-        bedtools coverage \
-            -a {input.windows} \
-            -b {input.snv} \
-            -header -counts -sorted \
-        | sed "1s/$/\\tnum_snv/" \
-        | gzip -c > {output}
-        """
-
-
 rule all_snv:
     input:
         snv=expand(rules.filter_snv_by_syntenic.output.snv, sm=tbl.index, h=[1, 2]),
@@ -292,7 +288,7 @@ rule all_snv:
 
 rule plot_cumulative_divergence:
     input:
-        rules.add_snv_to_windows.output,
+        rules.annotate_windows.output,
     output:
         report(
             "results/figures/cumulative_divergence.svg", category="Figures",
@@ -312,7 +308,7 @@ rule plot_callable_space:
         annotation_files=expand(
             rules.clean_annotation_files.output, anno=config["annotation_files"].keys()
         ),
-        windows=rules.add_snv_to_windows.output,
+        windows=rules.annotate_windows.output,
     output:
         report(
             "results/figures/callable_space.svg", category="Figures",

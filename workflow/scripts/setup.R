@@ -14,15 +14,20 @@ library(ggforce)
 # ## Load Data
 
 
-PAL <- c(SD = "#a70a0a", Unique = "black")
 # colors to use
 GRAY <- "#2F4F4F"
 RED <- "#af0404"
 BLUE <- "#3282b8"
 BLACK <- "#000000"
+PURPLE <- "#6402a1"
 COLOR1 <- RED
 COLOR2 <- GRAY
-COLORS <- c(SD = COLOR1, Unique = COLOR2)
+COLORS <- c(
+    SD = COLOR1,
+    Unique = COLOR2,
+    Sat = PURPLE,
+    Cen = PURPLE
+)
 
 
 get_num_bp <- function(df) {

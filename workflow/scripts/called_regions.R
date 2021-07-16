@@ -23,12 +23,12 @@ p
 
 
 
-#called_regions <- fread("results/snv_count_annotated_haplotype_coverage.bed.gz")
+# called_regions <- fread("results/snv_count_annotated_haplotype_coverage.bed.gz")
 called_regions <- fread(snakemake@input[["windows"]])
 p2 <- called_regions %>%
     mutate(region = case_when(
-        sd > 0.95 & cen < 0.7 ~ "SD",
-        cen > 0.7 ~ "Cen",
+        SD > 0.95 & Sat < 0.7 ~ "SD",
+        Sat > 0.7 ~ "Sat",
         TRUE ~ "Unique"
     )) %>%
     separate_rows(haps, sep = ",") %>%
@@ -46,7 +46,7 @@ p2 <- called_regions %>%
     ylab("") +
     xlab("Mbp") +
     theme_cowplot() +
-    theme(legend.position = "top") 
+    theme(legend.position = "top")
 
 fig <- cowplot::plot_grid(p, p2)
 fig
