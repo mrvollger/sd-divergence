@@ -305,9 +305,6 @@ rule plot_cumulative_divergence:
 rule plot_callable_space:
     input:
         beds=expand(rules.syntenic_and_callable.output, sm=tbl.index, h=[1, 2]),
-        annotation_files=expand(
-            rules.clean_annotation_files.output, anno=config["annotation_files"].keys()
-        ),
         windows=rules.annotate_windows.output,
     output:
         report(
@@ -315,8 +312,6 @@ rule plot_callable_space:
         ),
     log:
         "logs/callable_space.log",
-    params:
-        annotation_names=config["annotation_files"].keys(),
     conda:
         "envs/R.yml"
     threads: 1
