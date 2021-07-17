@@ -21,6 +21,7 @@ BLUE <- "#3282b8"
 BLACK <- "#000000"
 PURPLE <- "#6402a1"
 GREEN <- "#0d7a0d"
+ORANGE <- "#ce7f00"
 COLOR1 <- RED
 COLOR2 <- GRAY
 COLORS <- c(
@@ -29,6 +30,8 @@ COLORS <- c(
     Sat = PURPLE,
     Cen = PURPLE,
     chrX = GREEN,
+    TRF = BLUE,
+    RM = ORANGE,
     Other = "grey"
 )
 

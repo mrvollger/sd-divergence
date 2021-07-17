@@ -10,7 +10,7 @@ df$region <- "Other"
 for (anno in annotations) {
     df[df$region == "Other" & df[[anno]] > 0.90]$region <- anno
 }
-df[SD < 0.2 & Sat < 0.2 && region == "Other"]$region <- "Unique"
+df[SD < 0.2 & Sat < 0.2 & region == "Other"]$region <- "Unique"
 
 chrX <- copy(df[df[["#chr"]] == "chrX"])
 chrX$region <- "chrX"
