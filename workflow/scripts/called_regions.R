@@ -1,5 +1,7 @@
 source("workflow/scripts/setup.R")
-
+source("setup.R")
+getwd()
+dirname(sys.frame(1)$ofile)
 
 all.files <- Sys.glob("results/syntenic_and_callable/H*bed.gz")
 all.files <- snakemake@input[["beds"]]
@@ -50,4 +52,5 @@ p2 <- called_regions %>%
 
 fig <- cowplot::plot_grid(p, p2)
 fig
-ggsave(snakemake@output[[1]], plot = fig, width = 16, height = 9)
+height <- length(unique(called_regions$haps)) / 3
+ggsave(snakemake@output[[1]], plot = fig, width = 16, height = height)

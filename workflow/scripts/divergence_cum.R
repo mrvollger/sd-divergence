@@ -47,4 +47,4 @@ p <- ggplot() +
     theme(legend.position = "top", legend.title = element_blank()) +
     guides(fill = guide_legend(ncol = length(pal) / 2))
 p
-ggsave(outfile, width = 8, height = 5, plot = p)
+ggsave(outfile, width = 8, height = 8, plot = p)
