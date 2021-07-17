@@ -47,7 +47,8 @@ p2 <- called_regions %>%
     theme_cowplot() +
     theme(legend.position = "top")
 
-fig <- cowplot::plot_grid(p, p2)
-fig
-height <- length(unique(called_regions$haps)) / 3
+tmp <- called_regions %>%
+    separate_rows(haps, sep = ",")
+height <- length(unique(tmp$haps)) / 3
+fig() <- cowplot::plot_grid(p, p2)
 ggsave(snakemake@output[[1]], plot = fig, width = 16, height = height)
