@@ -2,7 +2,7 @@ import pandas as pd
 
 li = []
 for filename in snakemake.input.beds:
-    tdf = pd.read_csv(filename, index_col=None, sep="\t")
+    tdf = pd.read_csv(filename, index_col=None, sep="\t", low_memory=False)
     li.append(tdf)
 
 df = pd.concat(li, axis=0, ignore_index=True)

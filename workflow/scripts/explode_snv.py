@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv(snakemake.input.bed, sep="\t")
+df = pd.read_csv(snakemake.input.bed, sep="\t", low_memory=False)
 df = df.astype(str)
 df = (
     df.apply(lambda col: col.str.split(";").explode())
