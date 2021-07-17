@@ -20,23 +20,23 @@ pal <- COLORS[unique(df$region)]
 df$region <- factor(df$region)
 
 df <- df %>%
-    mutate(snv_per_kbp = 1000 * num_snv / (hap_count * (end - start))) %>%
-    filter(snv_per_kbp > 0) %>%
+    mutate(snv_per_kbp = 1e3 * num_snv / (hap_count * (end - start))) %>%
     data.table()
 
 
 
-fakeadd <- 0.1
+fakeadd <- 0.001
 p <- ggplot() +
     stat_ecdf(
-        data = df,
+        data = df %>%
+            filter(!region %in% c("Other", "Sat", "TRF", "RM")),
         aes(snv_per_kbp + fakeadd, color = region),
         size = 1.5, alpha = 0.75
     ) +
     scale_x_log10(
-        limits = c(fakeadd, NA),
-        breaks = c(fakeadd, 0.1, 1, 10),
-        labels = c("0", "0.10", "1.00", "10.00")
+        limits = c(fakeadd, 20),
+        breaks = c(fakeadd, 0.01, 0.1, 1, 10, 20),
+        labels = c("0.00", "0.01", "0.10", "1.00", "10.0", "20.0")
     ) +
     annotation_logticks(sides = "b") +
     scale_fill_manual(values = pal) +
