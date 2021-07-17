@@ -1,7 +1,4 @@
 source("workflow/scripts/setup.R")
-source("setup.R")
-getwd()
-dirname(sys.frame(1)$ofile)
 
 all.files <- Sys.glob("results/syntenic_and_callable/H*bed.gz")
 all.files <- snakemake@input[["beds"]]
