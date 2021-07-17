@@ -17,19 +17,10 @@ p <- df %>%
     ggtitle("Callable space for each haplotype assebmly",
         subtitle = "(Only regions with at least 1 Mbp of synteny considered)"
     )
-p
-
-
-
 
 # called_regions <- fread("results/snv_count_annotated_haplotype_coverage.bed.gz")
-called_regions <- fread(snakemake@input[["windows"]])
+called_regions <- read_in_snv_windows(snakemake@input[["windows"]])
 p2 <- called_regions %>%
-    mutate(region = case_when(
-        SD > 0.95 & Sat < 0.7 ~ "SD",
-        Sat > 0.7 ~ "Sat",
-        TRUE ~ "Unique"
-    )) %>%
     separate_rows(haps, sep = ",") %>%
     group_by(haps, region) %>%
     do(get_num_bp(.)) %>%
@@ -41,6 +32,7 @@ p2 <- called_regions %>%
     geom_bar(stat = "identity") +
     geom_vline(xintercept = 3100, color = RED, linetype = "dashed", size = 1) +
     geom_text(hjust = 0) +
+    scale_fill_manual(values = COLORS) +
     facet_col(. ~ region, scales = "free") +
     ylab("") +
     xlab("Mbp") +
@@ -49,6 +41,13 @@ p2 <- called_regions %>%
 
 tmp <- called_regions %>%
     separate_rows(haps, sep = ",")
-height <- length(unique(tmp$haps)) / 3
-fig() <- cowplot::plot_grid(p, p2)
-ggsave(snakemake@output[[1]], plot = fig, width = 16, height = height)
+
+height <- length(unique(tmp$haps))
+fig <- cowplot::plot_grid(p, p2)
+print(height)
+ggsave(snakemake@output[[1]],
+    plot = fig,
+    width = 16, height = height,
+    units = "in",
+    limitsize = FALSE
+)

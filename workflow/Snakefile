@@ -34,12 +34,15 @@ wildcard_constraints:
 
 rule all:
     input:
+        # windows
         uncallable="results/uncallable_regions.bed.gz",
-        snv="results/snv_count_annotated_haplotype_coverage.bed.gz",
-        all_snv="results/all_snv_exploded.bed.gz",
         filtered_sv_pop_snv=expand(
             "results/syntenic_and_callable/snv_{sm}.bed.gz", sm=tbl.index
         ),
+        annotated="results/annotated_windows.bed.gz",
+        # SNVs
+        snv="results/snv_over_windows.bed.gz",
+        # plots
         cumulative_divergence="results/figures/cumulative_divergence.svg",
         called_regions="results/figures/callable_space.svg",
 
@@ -67,6 +70,9 @@ rule make_windows:
         """
 
 
+#
+# per bed files
+#
 rule syntenic_and_callable:
     input:
         callable=lambda w: tbl.loc[w.sm][f"h{w.h}_callable"],
@@ -129,20 +135,9 @@ rule filter_snv_by_syntenic:
         """
 
 
-rule merge_filtered_snv_by_syntenic:
-    input:
-        beds=expand(rules.filter_snv_by_syntenic.output, h=[1, 2], allow_missing=True),
-    output:
-        snv="results/syntenic_and_callable/snv_{sm}.bed.gz",
-    log:
-        "logs/merge_filtered_snv_by_syntenic.{sm}.log",
-    conda:
-        "envs/env.yml"
-    threads: 1
-    script:
-        "scripts/implode_snv.py"
-
-
+#
+# add columns
+#
 rule haplotype_coverage_over_windows:
     input:
         windows=rules.make_windows.output,
@@ -156,7 +151,7 @@ rule haplotype_coverage_over_windows:
     threads: 1
     params:
         names=" ".join(expand("{sm}_{h}", sm=tbl.index, h=[1, 2])),
-        overlap=1 - config["window_size"], # makes sure bedtools merge only merges the same windows
+        overlap=1 - config["window_size"],  # makes sure bedtools merge only merges the same windows
     shell:
         """
         NUM_COL=$(gunzip -c {input.windows} | head -n 1 | awk '{{print NF}}' || :)
@@ -173,28 +168,6 @@ rule haplotype_coverage_over_windows:
             -d {params.overlap} \
             -c $NAME_COL,$BOOL_COL -o distinct,sum \
         | sed '1s/^/#chr\\tstart\\tend\\thaps\\thap_count\\n/' \
-        | gzip -c > {output}
-        """
-
-
-rule add_snv_to_windows:
-    input:
-        windows=rules.haplotype_coverage_over_windows.output,
-        snv=expand(rules.filter_snv_by_syntenic.output.snv, sm=tbl.index, h=[1, 2]),
-    output:
-        temp("temp/snvs_haplotype_coverage.bed.gz"),
-    log:
-        "logs/snv_count_windows.log",
-    conda:
-        "envs/env.yml"
-    threads: 1
-    shell:
-        """
-        bedtools coverage \
-            -a {input.windows} \
-            -b {input.snv} \
-            -header -counts -sorted \
-        | sed "1s/$/\\tnum_snv/" \
         | gzip -c > {output}
         """
 
@@ -219,18 +192,20 @@ rule clean_annotation_files:
 
 rule annotate_windows:
     input:
-        windows=rules.add_snv_to_windows.output,
+        windows=rules.haplotype_coverage_over_windows.output,
         annotation_files=expand(
             rules.clean_annotation_files.output, anno=config["annotation_files"].keys()
         ),
     output:
-        "results/snv_count_annotated_haplotype_coverage.bed.gz",
+        "results/annotated_windows.bed.gz",
     log:
         "logs/annotate_windows.log",
     conda:
         "envs/env.yml"
     params:
-        annotation_names="\t".join(config["annotation_files"].keys()),
+        annotation_names="\t".join(
+            ["anno_" + key for key in config["annotation_files"].keys()]
+        ),
     threads: 1
     shell:
         """
@@ -244,6 +219,23 @@ rule annotate_windows:
             | sed "1s/^/${{HEADER}}\\n/" \
             | gzip -c > {output}
         """
+
+
+#
+# group results
+#
+rule merge_filtered_snv_by_syntenic:
+    input:
+        beds=expand(rules.filter_snv_by_syntenic.output, h=[1, 2], allow_missing=True),
+    output:
+        snv="results/syntenic_and_callable/snv_{sm}.bed.gz",
+    log:
+        "logs/merge_filtered_snv_by_syntenic.{sm}.log",
+    conda:
+        "envs/env.yml"
+    threads: 1
+    script:
+        "scripts/implode_snv.py"
 
 
 rule uncallable_regions:
@@ -286,9 +278,61 @@ rule all_snv:
         """
 
 
+#
+# adding in the SNVs
+#
+rule add_snv_to_windows:
+    input:
+        windows=rules.annotate_windows.output,
+        snv=rules.filter_snv_by_syntenic.output.snv,
+    output:
+        temp("temp/add_snv/{sm}_{h}_snvs_haplotype_coverage.bed.gz"),
+    log:
+        "logs/snv_count_windows_{sm}_{h}.log",
+    conda:
+        "envs/env.yml"
+    threads: 1
+    shell:
+        """
+        bedtools coverage \
+            -a {input.windows} \
+            -b {input.snv} \
+            -header -counts -sorted \
+        | sed "1s/$/\\tsnv_{wildcards.sm}_{wildcards.h}/" \
+        | gzip -c > {output}
+        """
+
+
+rule merge_snv_in_windows:
+    input:
+        snv=expand(rules.add_snv_to_windows.output, sm=tbl.index, h=[1, 2]),
+    output:
+        snv="results/snv_over_windows.bed.gz",
+    log:
+        "logs/snv_count_windows.log",
+    threads: 1
+    run:
+        li = []
+        n_col = 0
+        for idx, file in enumerate(input.snv):
+            tdf = pd.read_csv(file, sep="\t", low_memory=False)
+            if idx == 0:
+                n_col = tdf.shape[1]
+            else:
+                assert tdf.shape[1] == n_col
+                tdf = tdf.iloc[:, -1]
+            li.append(tdf)
+
+        df = pd.concat(li, axis=1)
+        df.to_csv(output.snv, sep="\t", compression="gzip", index=False)
+
+
+#
+# plotting
+#
 rule plot_cumulative_divergence:
     input:
-        rules.annotate_windows.output,
+        rules.merge_snv_in_windows.output,
     output:
         report(
             "results/figures/cumulative_divergence.svg", category="Figures",
@@ -305,7 +349,7 @@ rule plot_cumulative_divergence:
 rule plot_callable_space:
     input:
         beds=expand(rules.syntenic_and_callable.output, sm=tbl.index, h=[1, 2]),
-        windows=rules.annotate_windows.output,
+        windows=rules.merge_snv_in_windows.output,
     output:
         report(
             "results/figures/callable_space.svg", category="Figures",

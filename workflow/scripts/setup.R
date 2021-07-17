@@ -42,3 +42,28 @@ get_num_bp <- function(df) {
         sum(width(gr))
     )
 }
+
+
+read_in_snv_windows <- function(infile) {
+    df <- fread(infile)
+
+    annotation_cols <- names(df)[grepl("anno_", names(df))]
+    snv_cols <- names(df)[grepl("snv_", names(df))]
+    annotation_cols
+    snv_cols
+
+    df$region <- "Other"
+    for (anno in annotation_cols) {
+        print(anno)
+        df[df$region == "Other" & df[[anno]] > 0.90]$region <- gsub("anno_", "", anno)
+    }
+    df[anno_SD < 0.2 & anno_Sat < 0.2 & region == "Other"]$region <- "Unique"
+    #
+    # add snv summary
+    #
+    df$num_snv <- rowSums(df[, ..snv_cols])
+    df <- df %>%
+        mutate(snv_per_kbp = 1e3 * num_snv / (hap_count * (end - start))) %>%
+        data.table()
+    df
+}

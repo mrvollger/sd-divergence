@@ -1,16 +1,10 @@
 source("workflow/scripts/setup.R")
 
-infile <- "results/snv_count_annotated_haplotype_coverage.bed.gz"
+infile <- "results/snv_over_windows.bed.gz"
 infile <- snakemake@input[[1]]
 outfile <- snakemake@output[[1]]
-df <- fread(infile)
 
-annotations <- colnames(df)[7:ncol(df)]
-df$region <- "Other"
-for (anno in annotations) {
-    df[df$region == "Other" & df[[anno]] > 0.90]$region <- anno
-}
-df[SD < 0.2 & Sat < 0.2 & region == "Other"]$region <- "Unique"
+df <- read_in_snv_windows(infile)
 
 chrX <- copy(df[df[["#chr"]] == "chrX"])
 chrX$region <- "chrX"
@@ -19,12 +13,10 @@ df <- rbind(df, chrX)
 pal <- COLORS[unique(df$region)]
 df$region <- factor(df$region)
 
-df <- df %>%
-    mutate(snv_per_kbp = 1e3 * num_snv / (hap_count * (end - start))) %>%
-    data.table()
 
-
-
+#
+# make plot
+#
 fakeadd <- 0.001
 p <- ggplot() +
     stat_ecdf(
@@ -35,8 +27,8 @@ p <- ggplot() +
     ) +
     scale_x_log10(
         limits = c(fakeadd, 20),
-        breaks = c(fakeadd, 0.01, 0.1, 1, 10, 20),
-        labels = c("0.00", "0.01", "0.10", "1.00", "10.0", "20.0")
+        breaks = c(fakeadd, 0.01, 0.1, 1, 10),
+        labels = c("0.00", "0.01", "0.10", "1.00", "10.0")
     ) +
     annotation_logticks(sides = "b") +
     scale_fill_manual(values = pal) +
