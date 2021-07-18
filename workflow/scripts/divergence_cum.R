@@ -79,7 +79,14 @@ p2 <- ggplot() +
     ) +
     annotation_logticks(sides = "b") +
     scale_color_manual(values = pal) +
-    theme_cowplot()
+    xlab(glue("% divergence of 10 kbp windows (1 kbp slide)")) +
+    ylab("Cumulative fraction of windows") +
+    ggtitle("Divergence of 10 kbp windows aligned to T2T-CHM13 v1.1",
+        subtitle = "(Minumum 1 Mbp alignment, SD windows are at least 95% SD)"
+    ) +
+    theme_cowplot() +
+    theme(legend.position = "top", legend.title = element_blank()) +
+    guides(fill = guide_legend(ncol = length(pal) / 2))
 p2
 # length(unique(plot.df2$name))
 ggsave(outfile2, width = 8, height = 8, plot = p2)
