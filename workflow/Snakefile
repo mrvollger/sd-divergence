@@ -337,6 +337,9 @@ rule plot_cumulative_divergence:
         report(
             "results/figures/cumulative_divergence.svg", category="Figures",
         ),
+        report(
+            "results/figures/cumulative_divergence_per_hap.svg", category="Figures",
+        ),
     log:
         "logs/cumulative_divergence.log",
     conda:

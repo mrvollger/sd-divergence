@@ -3,6 +3,7 @@ source("workflow/scripts/setup.R")
 infile <- "results/snv_over_windows.bed.gz"
 infile <- snakemake@input[[1]]
 outfile <- snakemake@output[[1]]
+outfile2 <- snakemake@output[[2]]
 
 df <- read_in_snv_windows(infile)
 
@@ -37,12 +38,39 @@ p <- ggplot() +
     scale_fill_manual(values = pal) +
     scale_color_manual(values = pal) +
     xlab(glue("% divergence of 10 kbp windows (1 kbp slide)")) +
-    ylab("Cumulative fraction of 5kbp windows") +
+    ylab("Cumulative fraction of windows") +
     ggtitle("Divergence of 10 kbp windows aligned to T2T-CHM13 v1.1",
         subtitle = "(Minumum 1 Mbp alignment, SD windows are at least 95% SD)"
     ) +
     theme_cowplot() +
     theme(legend.position = "top", legend.title = element_blank()) +
     guides(fill = guide_legend(ncol = length(pal) / 2))
-p
 ggsave(outfile, width = 8, height = 8, plot = p)
+
+
+#
+# all haplotypes
+#
+snv_cols <- names(df)[grepl("snv_", names(df))]
+
+plot.df2 <- df %>%
+    filter(region == "SD") %>%
+    pivot_longer(snv_cols) %>%
+    mutate(name = gsub("snv_", "", name)) %>%
+    rowwise() %>%
+    filter(grepl(name, haps)) %>%
+    ungroup() %>%
+    mutate(snv_per_kbp = value * 1e3 / (end - start)) %>%
+    data.table()
+plot.df2[snv_per_kbp == 0]$snv_per_kbp <- fakeadd
+
+p2 <- p +
+    stat_ecdf(
+        data = plot.df2,
+        aes(snv_per_kbp, group = paste0(name, region)),
+        color = "gray",
+        size = 0.1, alpha = 0.25,
+        linetype = "dashed"
+    )
+# length(unique(plot.df2$name))
+ggsave(outfile2, width = 8, height = 8, plot = p2)
