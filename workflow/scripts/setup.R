@@ -55,7 +55,7 @@ read_in_snv_windows <- function(infile) {
     df$region <- "Other"
     for (anno in annotation_cols) {
         print(anno)
-        df[df$region == "Other" & df[[anno]] > 0.90]$region <- gsub("anno_", "", anno)
+        df[df$region == "Other" & df[[anno]] > 0.95]$region <- gsub("anno_", "", anno)
     }
     df[anno_SD < 0.2 & anno_Sat < 0.2 & region == "Other"]$region <- "Unique"
     #
