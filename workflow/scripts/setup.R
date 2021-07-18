@@ -46,7 +46,7 @@ get_num_bp <- function(df) {
 
 read_in_snv_windows <- function(infile) {
     df <- fread(infile, showProgress = TRUE)
-    df = df[hap_count > 4]
+    df <- df[hap_count >= 4]
     annotation_cols <- names(df)[grepl("anno_", names(df))]
     snv_cols <- names(df)[grepl("snv_", names(df))]
     annotation_cols
