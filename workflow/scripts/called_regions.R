@@ -42,7 +42,7 @@ p2 <- called_regions %>%
 tmp <- called_regions %>%
     separate_rows(haps, sep = ",")
 
-height <- length(unique(tmp$haps)) / 2
+height <- length(unique(tmp$haps))
 fig <- cowplot::plot_grid(p, p2)
 print(height)
 ggsave(snakemake@output[[1]],
