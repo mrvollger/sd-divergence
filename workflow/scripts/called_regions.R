@@ -18,32 +18,30 @@ p <- df %>%
         subtitle = "(Only regions with at least 1 Mbp of synteny considered)"
     )
 
-# called_regions <- fread("results/snv_count_annotated_haplotype_coverage.bed.gz")
-called_regions <- read_in_snv_windows(snakemake@input[["windows"]])
+# read in long windows
+called_regions <- fread(snakemake@input[["windows"]])
+called_regions$region <- factor(called_regions$region, levels = names(COLORS))
 p2 <- called_regions %>%
-    separate_rows(haps, sep = ",") %>%
-    group_by(haps, region) %>%
+    group_by(name, region) %>%
     do(get_num_bp(.)) %>%
     ggplot(aes(
         x = V1 / 1e6,
-        y = haps,
+        y = name,
         label = comma(round(V1 / 1e6)), fill = region
     )) +
     geom_bar(stat = "identity") +
     geom_vline(xintercept = 3100, color = RED, linetype = "dashed", size = 1) +
     geom_text(hjust = 0) +
     scale_fill_manual(values = COLORS) +
-    facet_col(. ~ region, scales = "free") +
+    facet_wrap(. ~ region, scales = "free") +
     ylab("") +
     xlab("Mbp") +
     theme_cowplot() +
     theme(legend.position = "top")
 
-tmp <- called_regions %>%
-    separate_rows(haps, sep = ",")
-
-height <- length(unique(tmp$haps))
-fig <- cowplot::plot_grid(p, p2)
+height <- length(unique(called_regions$name)) / 2
+# fig <- cowplot::plot_grid(p, p2)
+fig <- p2
 print(height)
 ggsave(snakemake@output[[1]],
     plot = fig,

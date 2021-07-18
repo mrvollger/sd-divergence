@@ -35,12 +35,12 @@ wildcard_constraints:
 
 rule all:
     input:
-        uncallable="results/uncallable_regions.bed.gz",  # windows
+        uncallable="results/uncallable_regions.bed.gz", # windows
         filtered_sv_pop_snv=expand(
             "results/syntenic_and_callable/snv_{sm}.bed.gz", sm=tbl.index
         ),
-        annotated="results/annotated_windows.bed.gz",  # SNVs
-        snv="results/snv_over_windows.bed.gz",  # plots
+        annotated="results/annotated_windows.bed.gz", # SNVs
+        snv="results/snv_over_windows.bed.gz", # plots
         cumulative_divergence="results/figures/cumulative_divergence.svg",
         called_regions="results/figures/callable_space.svg",
 
@@ -149,7 +149,7 @@ rule haplotype_coverage_over_windows:
     threads: 1
     params:
         names=" ".join(expand("{sm}_{h}", sm=tbl.index, h=[1, 2])),
-        overlap=1 - config["window_size"],  # makes sure bedtools merge only merges the same windows
+        overlap=1 - config["window_size"], # makes sure bedtools merge only merges the same windows
     shell:
         """
         NUM_COL=$(gunzip -c {input.windows} | head -n 1 | awk '{{print NF}}' || :)
@@ -339,9 +339,11 @@ rule merge_snv_in_windows:
         df.to_csv(output.snv, sep="\t", compression="gzip", index=False)
 
 
-#
-# make a long filtered form of the df
-#
+        #
+        # make a long filtered form of the df
+        #
+
+
 rule long_and_filtered_windows:
     input:
         rules.merge_snv_in_windows.output,
@@ -361,8 +363,7 @@ rule long_and_filtered_windows:
 #
 rule plot_cumulative_divergence:
     input:
-        #rules.merge_snv_in_windows.output,
-        rules.long_and_filtered_windows.output,
+        rules.long_and_filtered_windows.output, #rules.merge_snv_in_windows.output,
     output:
         report(
             "results/figures/cumulative_divergence.svg", category="Figures",
@@ -381,8 +382,8 @@ rule plot_cumulative_divergence:
 
 rule plot_callable_space:
     input:
+        windows=rules.long_and_filtered_windows.output,
         beds=expand(rules.syntenic_and_callable.output, sm=tbl.index, h=[1, 2]),
-        windows=rules.merge_snv_in_windows.output,
     output:
         report(
             "results/figures/callable_space.svg", category="Figures",

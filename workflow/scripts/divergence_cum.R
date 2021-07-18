@@ -13,8 +13,7 @@ chrX$region <- "chrX"
 df <- rbind(df, chrX)
 
 pal <- COLORS[unique(df$region)]
-df$region <- factor(df$region)
-
+df$region <- factor(df$region, levels = names(COLORS))
 
 #
 # make plot

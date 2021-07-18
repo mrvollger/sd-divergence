@@ -25,8 +25,8 @@ ORANGE <- "#ce7f00"
 COLOR1 <- RED
 COLOR2 <- GRAY
 COLORS <- c(
-    SD = COLOR1,
     Unique = COLOR2,
+    SD = COLOR1,
     Sat = PURPLE,
     Cen = PURPLE,
     chrX = GREEN,
@@ -58,6 +58,7 @@ read_in_snv_windows <- function(infile) {
         df[df$region == "Other" & df[[anno]] > 0.95]$region <- gsub("anno_", "", anno)
     }
     df[anno_SD < 0.2 & anno_Sat < 0.2 & region == "Other"]$region <- "Unique"
+    df$region <- factor(df$region, levels = names(COLORS))
     #
     # add snv summary
     #
