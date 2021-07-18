@@ -1,6 +1,7 @@
 source("workflow/scripts/setup.R")
 
 infile <- "results/snv_over_windows.bed.gz"
+infile <- "https://eichlerlab.gs.washington.edu/help/mvollger/share/tmp.gz"
 infile <- snakemake@input[[1]]
 outfile <- snakemake@output[[1]]
 outfile2 <- snakemake@output[[2]]
@@ -54,7 +55,7 @@ ggsave(outfile, width = 8, height = 8, plot = p)
 snv_cols <- names(df)[grepl("snv_", names(df))]
 
 plot.df2 <- df %>%
-    filter(region == "SD") %>%
+    filter(region %in% c("SD", "Unique")) %>%
     pivot_longer(snv_cols) %>%
     mutate(name = gsub("snv_", "", name)) %>%
     rowwise() %>%
@@ -64,13 +65,21 @@ plot.df2 <- df %>%
     data.table()
 plot.df2[snv_per_kbp == 0]$snv_per_kbp <- fakeadd
 
-p2 <- p +
+p2 <- ggplot() +
     stat_ecdf(
         data = plot.df2,
-        aes(snv_per_kbp, group = paste0(name, region)),
-        color = "black",
-        size = 0.1,
-        linetype = "dashed"
-    )
+        aes(snv_per_kbp, group = paste0(name, region), color = region),
+        alpha = 0.2,
+        size = 1
+    ) +
+    scale_x_log10(
+        limits = c(fakeadd, 20),
+        breaks = c(fakeadd, 0.1, 1, 10),
+        labels = c("0.00", "0.10", "1.00", "10.0")
+    ) +
+    annotation_logticks(sides = "b") +
+    scale_color_manual(values = pal) +
+    theme_cowplot()
+p2
 # length(unique(plot.df2$name))
 ggsave(outfile2, width = 8, height = 8, plot = p2)
