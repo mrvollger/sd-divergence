@@ -67,3 +67,18 @@ read_in_snv_windows <- function(infile) {
         data.table()
     df
 }
+
+
+make_long_df <- function(df) {
+    snv_cols <- names(df)[grepl("snv_", names(df))]
+    df <- df %>%
+        filter(!region %in% c("Other", "Sat", "TRF", "RM")) %>%
+        pivot_longer(snv_cols) %>%
+        mutate(name = gsub("snv_", "", name)) %>%
+        rowwise() %>%
+        filter(grepl(name, haps)) %>%
+        ungroup() %>%
+        mutate(per_div = value * 1e2 / (end - start)) %>%
+        data.table()
+    df
+}

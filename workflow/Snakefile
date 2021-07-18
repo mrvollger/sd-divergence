@@ -35,12 +35,12 @@ wildcard_constraints:
 
 rule all:
     input:
-        uncallable="results/uncallable_regions.bed.gz", # windows
+        uncallable="results/uncallable_regions.bed.gz",  # windows
         filtered_sv_pop_snv=expand(
             "results/syntenic_and_callable/snv_{sm}.bed.gz", sm=tbl.index
         ),
-        annotated="results/annotated_windows.bed.gz", # SNVs
-        snv="results/snv_over_windows.bed.gz", # plots
+        annotated="results/annotated_windows.bed.gz",  # SNVs
+        snv="results/snv_over_windows.bed.gz",  # plots
         cumulative_divergence="results/figures/cumulative_divergence.svg",
         called_regions="results/figures/callable_space.svg",
 
@@ -149,7 +149,7 @@ rule haplotype_coverage_over_windows:
     threads: 1
     params:
         names=" ".join(expand("{sm}_{h}", sm=tbl.index, h=[1, 2])),
-        overlap=1 - config["window_size"], # makes sure bedtools merge only merges the same windows
+        overlap=1 - config["window_size"],  # makes sure bedtools merge only merges the same windows
     shell:
         """
         NUM_COL=$(gunzip -c {input.windows} | head -n 1 | awk '{{print NF}}' || :)
@@ -261,18 +261,33 @@ rule uncallable_regions:
 rule all_snv:
     input:
         snv=expand(rules.filter_snv_by_syntenic.output.snv, sm=tbl.index, h=[1, 2]),
+        annotation_files=expand(
+            rules.clean_annotation_files.output, anno=config["annotation_files"].keys()
+        ),
     output:
         "results/all_snv_exploded.bed.gz",
     log:
         "logs/snv_count_windows.log",
     conda:
         "envs/env.yml"
+    params:
+        annotation_names="\t".join(
+            ["anno_" + key for key in config["annotation_files"].keys()]
+        ),
     threads: 1
     shell:
         """
+        HEADER=$(gunzip -c {input.snv} | head -n 1 || :)
+        HEADER="${{HEADER}}\t{params.annotation_names}"
+        echo $HEADER
+
         gunzip -c {input.snv} \
-            | bedtools sort -i - -header \
-        | gzip -c > {output}
+            | bedtools sort -i - \
+            | bedtools annotate -i - -counts \
+                -files {input.annotation_files} \
+            | bedtools sort -i - \
+            | sed "1s/^/${{HEADER}}\\n/" \
+            | gzip -c > {output}
         """
 
 
@@ -324,14 +339,30 @@ rule merge_snv_in_windows:
         df.to_csv(output.snv, sep="\t", compression="gzip", index=False)
 
 
-        #
-        # plotting
-        #
-
-
-rule plot_cumulative_divergence:
+#
+# make a long filtered form of the df
+#
+rule long_and_filtered_windows:
     input:
         rules.merge_snv_in_windows.output,
+    output:
+        snv="results/long_and_filtered_snv_over_windows.bed.gz",
+    log:
+        "logs/long_and_filter.log",
+    conda:
+        "envs/R.yml"
+    threads: 1
+    script:
+        "scripts/make_long_and_filter.R"
+
+
+#
+# plotting
+#
+rule plot_cumulative_divergence:
+    input:
+        #rules.merge_snv_in_windows.output,
+        rules.long_and_filtered_windows.output,
     output:
         report(
             "results/figures/cumulative_divergence.svg", category="Figures",

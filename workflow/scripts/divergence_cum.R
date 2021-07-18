@@ -1,12 +1,12 @@
 source("workflow/scripts/setup.R")
 
-infile <- "results/snv_over_windows.bed.gz"
-infile <- "https://eichlerlab.gs.washington.edu/help/mvollger/share/tmp.gz"
+# infile <- "results/snv_over_windows.bed.gz"
+# infile <- "https://eichlerlab.gs.washington.edu/help/mvollger/share/tmp.gz"
 infile <- snakemake@input[[1]]
 outfile <- snakemake@output[[1]]
 outfile2 <- snakemake@output[[2]]
 
-df <- read_in_snv_windows(infile)
+df <- fread(infile)
 
 chrX <- copy(df[df[["#chr"]] == "chrX"])
 chrX$region <- "chrX"
@@ -19,19 +19,8 @@ df$region <- factor(df$region)
 #
 # make plot
 #
-fakeadd <- 0.01
-snv_cols <- names(df)[grepl("snv_", names(df))]
-# plot.df <- df %>%
-#    mutate(per_div = num_snv * 1e2 / (hap_count * (end - start)))
-plot.df <- df %>%
-    filter(!region %in% c("Other", "Sat", "TRF", "RM")) %>%
-    pivot_longer(snv_cols) %>%
-    mutate(name = gsub("snv_", "", name)) %>%
-    rowwise() %>%
-    filter(grepl(name, haps)) %>%
-    ungroup() %>%
-    mutate(per_div = value * 1e2 / (end - start)) %>%
-    data.table()
+fakeadd <- 0.005
+plot.df <- df
 plot.df[per_div == 0]$per_div <- fakeadd
 
 p <- ggplot() +
@@ -42,8 +31,8 @@ p <- ggplot() +
     ) +
     scale_x_log10(
         limits = c(fakeadd, 20),
-        breaks = c(fakeadd, 0.1, 1, 10),
-        labels = c("0.00", "0.10", "1.00", "10.0")
+        breaks = c(fakeadd, 0.01, 0.1, 1, 10),
+        labels = c("0.00", "0.01", "0.10", "1.00", "10.0")
     ) +
     annotation_logticks(sides = "b") +
     scale_fill_manual(values = pal) +
