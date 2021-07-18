@@ -46,7 +46,7 @@ p <- ggplot() +
     theme_cowplot() +
     theme(legend.position = "top", legend.title = element_blank()) +
     guides(fill = guide_legend(ncol = length(pal) / 2))
-ggsave(outfile, width = 8, height = 8, plot = p)
+ggsave(outfile, width = 12, height = 8, plot = p)
 
 
 #
@@ -89,4 +89,4 @@ p2 <- ggplot() +
     guides(fill = guide_legend(ncol = length(pal) / 2))
 p2
 # length(unique(plot.df2$name))
-ggsave(outfile2, width = 8, height = 8, plot = p2)
+ggsave(outfile2, width = 12, height = 8, plot = p2)
