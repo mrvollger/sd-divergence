@@ -68,7 +68,7 @@ p2 <- p +
     stat_ecdf(
         data = plot.df2,
         aes(snv_per_kbp, group = paste0(name, region)),
-        color = "gray",
+        color = "black",
         size = 0.1,
         linetype = "dashed"
     )
