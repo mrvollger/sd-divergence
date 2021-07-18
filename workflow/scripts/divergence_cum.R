@@ -20,14 +20,24 @@ df$region <- factor(df$region)
 # make plot
 #
 fakeadd <- 0.01
+snv_cols <- names(df)[grepl("snv_", names(df))]
+# plot.df <- df %>%
+#    mutate(per_div = num_snv * 1e2 / (hap_count * (end - start)))
 plot.df <- df %>%
-    filter(!region %in% c("Other", "Sat", "TRF", "RM"))
-plot.df[snv_per_kbp == 0]$snv_per_kbp <- fakeadd
+    filter(!region %in% c("Other", "Sat", "TRF", "RM")) %>%
+    pivot_longer(snv_cols) %>%
+    mutate(name = gsub("snv_", "", name)) %>%
+    rowwise() %>%
+    filter(grepl(name, haps)) %>%
+    ungroup() %>%
+    mutate(per_div = value * 1e2 / (end - start)) %>%
+    data.table()
+plot.df[per_div == 0]$per_div <- fakeadd
 
 p <- ggplot() +
     stat_ecdf(
         data = plot.df,
-        aes(snv_per_kbp, color = region),
+        aes(per_div, color = region),
         size = 1.5, alpha = 0.75
     ) +
     scale_x_log10(
@@ -52,41 +62,28 @@ ggsave(outfile, width = 12, height = 8, plot = p)
 #
 # all haplotypes
 #
-snv_cols <- names(df)[grepl("snv_", names(df))]
-
-plot.df2 <- df %>%
+plot.df2 <- plot.df %>%
     filter(region %in% c("SD", "Unique")) %>%
-    pivot_longer(snv_cols) %>%
-    mutate(name = gsub("snv_", "", name)) %>%
-    rowwise() %>%
-    filter(grepl(name, haps)) %>%
-    ungroup() %>%
-    mutate(snv_per_kbp = value * 1e3 / (end - start)) %>%
     data.table()
-plot.df2[snv_per_kbp == 0]$snv_per_kbp <- fakeadd
 
-p2 <- ggplot() +
+# plot.df2 <- df %>%
+#    filter(region %in% c("SD", "Unique")) %>%
+#    pivot_longer(snv_cols) %>%
+#    mutate(name = gsub("snv_", "", name)) %>%
+#    rowwise() %>%
+#    filter(grepl(name, haps)) %>%
+#    ungroup() %>%
+#    mutate(per_div = value * 1e2 / (end - start)) %>%
+# plot.df2[per_div == 0]$per_div <- fakeadd
+
+p2 <- p +
     stat_ecdf(
         data = plot.df2,
-        aes(snv_per_kbp, group = paste0(name, region), color = region),
-        alpha = 0.2,
-        size = 1
-    ) +
-    scale_x_log10(
-        limits = c(fakeadd, 20),
-        breaks = c(fakeadd, 0.1, 1, 10),
-        labels = c("0.00", "0.10", "1.00", "10.0")
-    ) +
-    annotation_logticks(sides = "b") +
-    scale_color_manual(values = pal) +
-    xlab(glue("% divergence of 10 kbp windows (1 kbp slide)")) +
-    ylab("Cumulative fraction of windows") +
-    ggtitle("Divergence of 10 kbp windows aligned to T2T-CHM13 v1.1",
-        subtitle = "(Minumum 1 Mbp alignment, SD windows are at least 95% SD)"
-    ) +
-    theme_cowplot() +
-    theme(legend.position = "top", legend.title = element_blank()) +
-    guides(fill = guide_legend(ncol = length(pal) / 2))
+        aes(per_div, group = paste0(name, region), color = region),
+        alpha = 0.5,
+        size = 0.1,
+        linetype = "dashed"
+    )
 p2
 # length(unique(plot.df2$name))
 ggsave(outfile2, width = 12, height = 8, plot = p2)
