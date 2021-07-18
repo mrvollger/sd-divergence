@@ -69,7 +69,7 @@ p2 <- p +
         data = plot.df2,
         aes(snv_per_kbp, group = paste0(name, region)),
         color = "gray",
-        size = 0.1, alpha = 0.25,
+        size = 0.1,
         linetype = "dashed"
     )
 # length(unique(plot.df2$name))
