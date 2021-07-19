@@ -39,7 +39,7 @@ rule all:
         annotated="results/annotated_windows.bed.gz", # SNVs
         cumulative_divergence="results/figures/cumulative_divergence.svg",
         called_regions="results/figures/callable_space.svg",
-        snv_table = "results/tables/snv_per_kbp.tbl",
+        snv_table="results/tables/snv_per_kbp.tbl",
 
 
 rule make_windows:
@@ -348,6 +348,7 @@ rule long_and_filtered_windows:
             > {output}
         """
 
+
 #
 # summary table
 #
@@ -366,7 +367,6 @@ rule make_summary_tables:
     threads: 1
     script:
         "scripts/per_kbp_stats.R"
-
 
 
 #
