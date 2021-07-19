@@ -39,6 +39,7 @@ rule all:
         annotated="results/annotated_windows.bed.gz", # SNVs
         cumulative_divergence="results/figures/cumulative_divergence.svg",
         called_regions="results/figures/callable_space.svg",
+        snv_table = "results/tables/snv_per_kbp.tbl",
 
 
 rule make_windows:
@@ -346,6 +347,26 @@ rule long_and_filtered_windows:
             | gzip -c \
             > {output}
         """
+
+#
+# summary table
+#
+rule make_summary_tables:
+    input:
+        rules.all_snv.output,
+        rules.long_and_filtered_windows.output,
+    output:
+        report(
+            "results/tables/snv_per_kbp.tbl", category="Tables",
+        ),
+    log:
+        "logs/table_snps_per_kbp.log",
+    conda:
+        "envs/R.yml"
+    threads: 1
+    script:
+        "scripts/per_kbp_stats.R"
+
 
 
 #
