@@ -5,11 +5,8 @@ import pandas as pd
 from snakemake.utils import min_version
 
 min_version("6.0")
-
-
+shell.prefix("set -eo pipefail; ")
 SDIR = os.path.realpath(os.path.dirname(srcdir("Snakefile")))
-shell.prefix(f"set -eo pipefail;")
-
 
 tbl = pd.read_csv(config["manifest"], sep="\t")
 tbl.set_index("sample", inplace=True)
@@ -30,16 +27,16 @@ if TEMP_DIR != "temp":
 
 
 wildcard_constraints:
-    sm="|".join(tbl.index) + "|all",
+    sm="|".join(tbl.index),
 
 
 rule all:
     input:
-        uncallable="results/uncallable_regions.bed.gz",  # windows
+        uncallable="results/uncallable_regions.bed.gz", # windows
         filtered_sv_pop_snv=expand(
             "results/syntenic_and_callable/snv_{sm}.bed.gz", sm=tbl.index
         ),
-        annotated="results/annotated_windows.bed.gz",  # SNVs
+        annotated="results/annotated_windows.bed.gz", # SNVs
         cumulative_divergence="results/figures/cumulative_divergence.svg",
         called_regions="results/figures/callable_space.svg",
 
@@ -148,7 +145,7 @@ rule haplotype_coverage_over_windows:
     threads: 1
     params:
         names=" ".join(expand("{sm}_{h}", sm=tbl.index, h=[1, 2])),
-        overlap=1 - config["window_size"],  # makes sure bedtools merge only merges the same windows
+        overlap=1 - config["window_size"], # makes sure bedtools merge only merges the same windows
     shell:
         """
         NUM_COL=$(gunzip -c {input.windows} | head -n 1 | awk '{{print NF}}' || :)
@@ -201,7 +198,7 @@ rule annotate_windows:
         "envs/env.yml"
     params:
         annotation_names="\t".join(
-            ["anno_" + key for key in config["annotation_files"].keys()]
+            [f"anno_{key}" for key in config["annotation_files"].keys()]
         ),
     threads: 1
     shell:
@@ -271,7 +268,7 @@ rule all_snv:
         "envs/env.yml"
     params:
         annotation_names="\t".join(
-            ["anno_" + key for key in config["annotation_files"].keys()]
+            [f"anno_{key}" for key in config["annotation_files"].keys()]
         ),
     threads: 1
     shell:
@@ -298,7 +295,7 @@ rule add_snv_to_windows:
         windows=rules.annotate_windows.output,
         snv=rules.filter_snv_by_syntenic.output.snv,
     output:
-        temp("temp/add_snv/{sm}_{h}_snvs_haplotype_coverage.bed.gz"),
+        temp("temp/add_snv/{sm}_{h}_snvs_haplotype_coverage.bed"),
     log:
         "logs/snv_count_windows_{sm}_{h}.log",
     conda:
@@ -319,7 +316,7 @@ rule add_snv_to_windows:
             | sed "s/$/\\t{wildcards.sm}_{wildcards.h}/" \
             | sed "1s/^/${{HEADER}}\\n/" \
             | csvtk cut -C "$" -tT -f -haps \
-            | gzip -c > {output}
+            > {output}
         """
 
 
@@ -340,9 +337,12 @@ rule long_and_filtered_windows:
     threads: 1
     shell:
         """
-        gunzip -c {input.snv} \
-            | bedtools sort -i - \
-                -header \
+        HEADER=$(head -n 1 {input.snv[1]} || :)
+        echo $HEADER
+
+        sort -m -k 1,1 -k2,2n {input.snv} \
+            | grep -v "^#" \
+            | sed "1s/^/${{HEADER}}\\n/" \
             | gzip -c \
             > {output}
         """
