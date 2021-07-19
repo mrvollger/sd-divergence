@@ -19,14 +19,14 @@ p <- df %>%
     )
 
 # read in long windows
-called_regions <- fread(snakemake@input[["windows"]])
+called_regions <- read_in_snv_windows(snakemake@input[["windows"]])
 called_regions$region <- factor(called_regions$region, levels = names(COLORS))
 p2 <- called_regions %>%
-    group_by(name, region) %>%
+    group_by(hap, region) %>%
     do(get_num_bp(.)) %>%
     ggplot(aes(
         x = V1 / 1e6,
-        y = name,
+        y = hap,
         label = comma(round(V1 / 1e6)), fill = region
     )) +
     geom_bar(stat = "identity") +
@@ -39,7 +39,7 @@ p2 <- called_regions %>%
     theme_cowplot() +
     theme(legend.position = "top")
 
-height <- length(unique(called_regions$name)) / 2
+height <- length(unique(called_regions$hap)) / 2
 # fig <- cowplot::plot_grid(p, p2)
 fig <- p2
 print(height)

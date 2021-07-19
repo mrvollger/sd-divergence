@@ -1,12 +1,10 @@
 source("workflow/scripts/setup.R")
 
-# infile <- "results/snv_over_windows.bed.gz"
-# infile <- "https://eichlerlab.gs.washington.edu/help/mvollger/share/tmp.gz"
 infile <- snakemake@input[[1]]
 outfile <- snakemake@output[[1]]
 outfile2 <- snakemake@output[[2]]
 
-df <- fread(infile)
+df <- read_in_snv_windows(infile)
 
 chrX <- copy(df[df[["#chr"]] == "chrX"])
 chrX$region <- "chrX"
@@ -54,24 +52,12 @@ plot.df2 <- plot.df %>%
     filter(region %in% c("SD", "Unique")) %>%
     data.table()
 
-# plot.df2 <- df %>%
-#    filter(region %in% c("SD", "Unique")) %>%
-#    pivot_longer(snv_cols) %>%
-#    mutate(name = gsub("snv_", "", name)) %>%
-#    rowwise() %>%
-#    filter(grepl(name, haps)) %>%
-#    ungroup() %>%
-#    mutate(per_div = value * 1e2 / (end - start)) %>%
-# plot.df2[per_div == 0]$per_div <- fakeadd
-
 p2 <- p +
     stat_ecdf(
         data = plot.df2,
-        aes(per_div, group = paste0(name, region), color = region),
+        aes(per_div, group = paste0(hap, region), color = region),
         alpha = 0.5,
         size = 0.1,
         linetype = "dashed"
     )
-p2
-# length(unique(plot.df2$name))
 ggsave(outfile2, width = 12, height = 8, plot = p2)
