@@ -6,6 +6,7 @@ outfile2 <- snakemake@output[[2]]
 
 df <- read_in_snv_windows(infile)
 
+
 chrX <- copy(df[df[["#chr"]] == "chrX"])
 chrX$region <- "chrX"
 df <- rbind(df, chrX)
@@ -17,7 +18,9 @@ df$region <- factor(df$region, levels = names(COLORS))
 # make plot
 #
 fakeadd <- 0.005
-plot.df <- df
+plot.df <- df %>%
+    filter(region %in% c("Unique", "SD", "chrX")) %>%
+    data.table()
 plot.df[per_div == 0]$per_div <- fakeadd
 
 p <- ggplot() +
