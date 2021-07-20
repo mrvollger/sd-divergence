@@ -279,7 +279,6 @@ rule annotate_snv:
         echo $HEADER
 
         gunzip -c {input.snv} \
-            | bedtools sort -i - \
             | bedtools annotate -i - -counts \
                 -files {input.annotation_files} \
             | bedtools sort -i - \
