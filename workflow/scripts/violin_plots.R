@@ -32,5 +32,5 @@ p <- df %>%
 
 ggsave(outfile,
     plot = p,
-    width = 12, height = 12,
+    width = 16, height = 9,
 )
