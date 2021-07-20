@@ -33,7 +33,7 @@ hap_region_overlaps <- function(df, groupvars) {
     gr2 <- toGRanges(df.hap)
     o <- findOverlaps(gr, gr2)
     cbind(
-        df[unique(queryHits(o)), ],
+        df[queryHits(o), ],
         df.hap[subjectHits(o), c("region", "region_size")]
     )
 }
