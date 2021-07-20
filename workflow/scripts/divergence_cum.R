@@ -40,7 +40,7 @@ p <- ggplot() +
     xlab(glue("% divergence of 10 kbp windows (1 kbp slide)")) +
     ylab("Cumulative fraction of windows") +
     ggtitle("Divergence of 10 kbp windows aligned to T2T-CHM13 v1.1",
-        subtitle = "(Minumum 1 Mbp alignment, SD windows are at least 95% SD)"
+        subtitle = "(Minimum 1 Mbp alignment, SD windows are at least 95% SD)"
     ) +
     theme_cowplot() +
     theme(legend.position = "top", legend.title = element_blank()) +

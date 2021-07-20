@@ -22,7 +22,7 @@ p <- df %>%
     ) +
     geom_violin(alpha = 0.5) +
     geom_jitter(width = 0.2) +
-    facet_col(~Superpopulation) +
+    facet_row(~Superpopulation) +
     scale_fill_manual(values = c(COLOR1, COLOR2)) +
     scale_color_manual(values = c(COLOR1, COLOR2)) +
     theme_cowplot() +
