@@ -40,7 +40,6 @@ p2 <- called_regions %>%
     theme(legend.position = "top")
 
 height <- length(unique(called_regions$hap)) / 2
-# fig <- cowplot::plot_grid(p, p2)
 fig <- p2
 print(height)
 ggsave(snakemake@output[[1]],

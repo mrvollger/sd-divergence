@@ -45,17 +45,6 @@ get_num_bp <- function(df) {
 
 read_in_snv_windows <- function(infile) {
     df <- fread(infile, showProgress = TRUE, nThread = snakemake@threads)
-    df <- df[hap_count >= 4]
-
-    annotation_cols <- names(df)[grepl("anno_", names(df))]
-
-    df$region <- "Other"
-    for (anno in annotation_cols) {
-        df[df$region == "Other" & df[[anno]] > 0.95]$region <- gsub("anno_", "", anno)
-    }
-    df[anno_SD < 0.2 & anno_Sat < 0.2 & region == "Other"]$region <- "Unique"
-    df$region <- factor(df$region, levels = names(COLORS))
-
     df <- df %>%
         mutate(per_div = 1e2 * num_snv / (end - start)) %>%
         data.table()
