@@ -10,6 +10,7 @@ library(karyoploteR, quietly = TRUE)
 library(GenomicRanges, quietly = TRUE)
 library(ggforce)
 library(tidyr)
+library(knitr)
 
 # start cluster
 # if (!require("multidplyr")) {

@@ -6,6 +6,7 @@ infile2 <- "results/long_and_filtered_snv_over_windows.bed.gz"
 infile <- snakemake@input[[1]]
 infile2 <- snakemake@input[[2]]
 outfile <- snakemake@output[[1]]
+outfile2 <- snakemake@output[[2]]
 
 df <- fread(infile)
 long_windows <- read_in_snv_windows(infile2)
@@ -60,3 +61,11 @@ out_df <- df_snv_annotated %>%
     data.table()
 
 fwrite(out_df, outfile, sep = "\t", quote = FALSE, row.names = FALSE)
+
+fileConn <- file(paste0(outfile2, "/index.html"))
+x <- kable(out_df,
+    format = "html",
+    caption = "Average divergence statistics"
+)
+write(x, fileConn)
+close(fileConn)

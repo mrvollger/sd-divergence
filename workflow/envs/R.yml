@@ -21,4 +21,5 @@ dependencies:
   - bioconductor-genomicranges
   - bioconductor-karyoploter
   - r-ggforce
+  - r-knitr
   

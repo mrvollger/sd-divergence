@@ -357,9 +357,8 @@ rule make_summary_tables:
         rules.all_snv.output,
         rules.long_and_filtered_windows.output,
     output:
-        report(
-            "results/tables/snv_per_kbp.tbl", category="Tables",
-        ),
+        "results/tables/snv_per_kbp.tbl",
+        report(directory("results/tables/"), category="Tables", htmlindex="index.html"),
     log:
         "logs/table_snps_per_kbp.log",
     conda:
