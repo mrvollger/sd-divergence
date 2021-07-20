@@ -37,7 +37,7 @@ rule all:
             "results/syntenic_and_callable/snv_{sm}.bed.gz", sm=tbl.index
         ),
         cumulative_divergence="results/figures/cumulative_divergence.svg",
-        violin = "results/figures/violin.svg",
+        violin="results/figures/violin.svg",
         called_regions="results/figures/callable_space.svg",
         snv_table="results/tables/snv_per_kbp.tbl",
         windows="results/windows.bed.gz",
@@ -419,7 +419,9 @@ rule make_summary_table:
         rules.long_and_filtered_windows.output,
     output:
         tbl="results/tables/snv_per_kbp.tbl",
-        html=report(directory("results/tables/"), category="Tables", htmlindex="index.html"),
+        html=report(
+            directory("results/tables/"), category="Tables", htmlindex="index.html"
+        ),
     log:
         "logs/table_snps_per_kbp.log",
     conda:
@@ -467,6 +469,7 @@ rule plot_callable_space:
     script:
         "scripts/called_regions.R"
 
+
 rule plot_violin:
     input:
         rules.make_summary_table.output.tbl,
@@ -482,6 +485,7 @@ rule plot_violin:
     threads: 1
     script:
         "scripts/violin_plots.R"
+
 
 rule plots:
     input:
