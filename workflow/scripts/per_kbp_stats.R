@@ -7,8 +7,8 @@ infile <- snakemake@input[[1]]
 infile2 <- snakemake@input[[2]]
 outfile <- snakemake@output[[1]]
 outfile2 <- snakemake@output[[2]]
-
-df <- fread(infile)
+print(snakemake@threads)
+df <- fread(infile, showProgress = TRUE, nThread = snakemake@threads)
 long_windows <- read_in_snv_windows(infile2)
 
 dply_reduce <- function(df, groupvars) {
@@ -27,9 +27,10 @@ hap_annotated_windows <- long_windows %>%
     data.table()
 
 
-hap_region_overlaps <- function(df, groupvars) {
+hap_region_overlaps <- function(df, filter_hap) {
+    print(paste(filter_hap, nrow(df)))
     gr <- toGRanges(as.data.frame(df))
-    df.hap <- hap_annotated_windows[hap == groupvars$hap]
+    df.hap <- hap_annotated_windows[hap == filter_hap]
     gr2 <- toGRanges(df.hap)
     o <- findOverlaps(gr, gr2)
     cbind(
@@ -38,11 +39,27 @@ hap_region_overlaps <- function(df, groupvars) {
     )
 }
 
+# start cluster
+# if (!require("multidplyr")) {
+#    install.packages("multidplyr")
+# }
+# library(multidplyr)
+# cluster <- new_cluster(8)
+# cluster_copy(cluster, hap_region_overlaps)
+# cluster_copy(cluster, hap_annotated_windows)
+# cluster_library(cluster, "dplyr")
+
+
+
 df_snv_annotated <- df %>%
     mutate(hap = paste0(SAMPLE, gsub("h", "_", HAP))) %>%
     group_by(hap) %>%
-    group_modify(hap_region_overlaps) %>%
+    # partition(cluster) %>%
+    # group_modify(hap_region_overlaps) %>%
+    summarise(hap_region_overlaps(cur_data(), hap[1])) %>%
+    ungroup() %>%
     select(-hap, hap) %>%
+    # collect() %>%
     data.table()
 
 out_df <- df_snv_annotated %>%

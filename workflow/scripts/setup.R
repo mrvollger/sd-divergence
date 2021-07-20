@@ -12,13 +12,6 @@ library(ggforce)
 library(tidyr)
 library(knitr)
 
-# start cluster
-# if (!require("multidplyr")) {
-#    install.packages("multidplyr")
-# }
-# cluster <- new_cluster(8)
-# cluster_library(cluster, "dplyr")
-
 
 # colors to use
 GRAY <- "#2F4F4F"
@@ -51,7 +44,7 @@ get_num_bp <- function(df) {
 
 
 read_in_snv_windows <- function(infile) {
-    df <- fread(infile, showProgress = TRUE)
+    df <- fread(infile, showProgress = TRUE, nThread = snakemake@threads)
     df <- df[hap_count >= 4]
 
     annotation_cols <- names(df)[grepl("anno_", names(df))]

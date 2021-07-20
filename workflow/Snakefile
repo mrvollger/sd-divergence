@@ -385,7 +385,7 @@ rule make_summary_tables:
         "logs/table_snps_per_kbp.log",
     conda:
         "envs/R.yml"
-    threads: 1
+    threads: 8
     script:
         "scripts/per_kbp_stats.R"
 
