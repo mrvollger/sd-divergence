@@ -12,8 +12,9 @@ pop <- fread(infile2, fill = TRUE)
 df <- fread(infile) %>%
     mutate(Sample = gsub("_(1|2)", "", hap)) %>%
     merge(pop, by = "Sample", all.x = T) %>%
+    mutate(SD = `SD # SNVs per kbp`, Unique = `Unique # SNVs per kbp`) %>%
     pivot_longer(
-        cols = c("SD # SNVs per kbp", "Unique # SNVs per kbp"),
+        cols = c("SD", "Unique"),
     )
 
 p <- df %>%

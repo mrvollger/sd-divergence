@@ -167,7 +167,6 @@ rule haplotype_coverage_over_windows:
         | gzip -c > {output}
         """
 
-
 rule clean_annotation_files:
     input:
         annotation_file=lambda w: config["annotation_files"][w.anno],
