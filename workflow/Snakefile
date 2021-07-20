@@ -255,16 +255,16 @@ rule uncallable_regions:
         """
 
 
-rule all_snv:
+rule annotate_snv:
     input:
-        snv=expand(rules.filter_snv_by_syntenic.output.snv, sm=tbl.index, h=[1, 2]),
+        snv=rules.filter_snv_by_syntenic.output.snv,
         annotation_files=expand(
             rules.clean_annotation_files.output, anno=config["annotation_files"].keys()
         ),
     output:
-        "results/all_snv_exploded.bed.gz",
+        temp("temp/snv/anno_{sm}_{h}.bed"),
     log:
-        "logs/snv_count_windows.log",
+        "logs/{sm}_{h}_snv_anno.log",
     conda:
         "envs/env.yml"
     params:
@@ -284,7 +284,30 @@ rule all_snv:
                 -files {input.annotation_files} \
             | bedtools sort -i - \
             | sed "1s/^/${{HEADER}}\\n/" \
-            | gzip -c > {output}
+            > {output}
+        """
+
+
+rule all_snv:
+    input:
+        snv=expand(rules.annotate_snv.output, sm=tbl.index, h=[1, 2]),
+    output:
+        "results/all_snv_exploded.bed.gz",
+    log:
+        "logs/snv_count_windows.log",
+    conda:
+        "envs/env.yml"
+    threads: 1
+    shell:
+        """
+        HEADER=$(head -n 1 {input.snv[1]} || :)
+        echo $HEADER
+
+        sort -m -k 1,1 -k2,2n {input.snv} \
+            | grep -v "^#" \
+            | sed "1s/^/${{HEADER}}\\n/" \
+            | gzip -c \
+            > {output}
         """
 
 
