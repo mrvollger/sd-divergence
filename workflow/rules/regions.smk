@@ -1,26 +1,3 @@
-rule make_windows:
-    input:
-        fai=f"{config['ref']}.fai",
-        annotation_files=config["annotation_files"].values(),
-    output:
-        temp("temp/windows.bed.gz"),
-    log:
-        "logs/windows.log",
-    conda:
-        "../envs/env.yml"
-    params:
-        window_size=config["window_size"],
-        step_size=config["step_size"],
-        annotation_names="\t".join(config["annotation_files"].keys()),
-    threads: 1
-    shell:
-        """
-        bedtools makewindows -g {input.fai} -w {params.window_size} -s {params.step_size} \
-            | bedtools sort -i - \
-            | gzip -c > {output}
-        """
-
-
 #
 # per bed files
 #
@@ -48,43 +25,6 @@ rule syntenic_and_callable:
         """
 
 
-#
-# add columns
-#
-rule haplotype_coverage_over_windows:
-    input:
-        windows=rules.make_windows.output,
-        beds=expand(rules.syntenic_and_callable.output, sm=tbl.index, h=[1, 2]),
-    output:
-        temp("temp/haplotype_coverage.bed.gz"),
-    log:
-        "logs/haplotype_coverage.log",
-    conda:
-        "../envs/env.yml"
-    threads: 1
-    params:
-        names=" ".join(expand("{sm}_{h}", sm=tbl.index, h=[1, 2])),
-        overlap=1 - config["window_size"],  # makes sure bedtools merge only merges the same windows
-    shell:
-        """
-        NUM_COL=$(gunzip -c {input.windows} | head -n 1 | awk '{{print NF}}' || :)
-        NAME_COL=$((NUM_COL+1))
-        BOOL_COL=$((NUM_COL+2))
-        echo $NAME_COL $BOOL_COL
-
-        bedtools intersect -f 0.95 -C \
-            -sorted -sortout \
-            -a {input.windows} -b {input.beds} \
-            -names {params.names} \
-        | awk -v bool=$BOOL_COL '$bool != 0' \
-        | bedtools merge -i - \
-            -d {params.overlap} \
-            -c $NAME_COL,$BOOL_COL -o distinct,sum \
-        | sed '1s/^/#chr\\tstart\\tend\\thaps\\thap_count\\n/' \
-        | gzip -c > {output}
-        """
-
-
 rule clean_annotation_files:
     input:
         annotation_file=lambda w: config["annotation_files"][w.anno],
@@ -103,55 +43,91 @@ rule clean_annotation_files:
         """
 
 
-rule annotate_windows:
+#
+# combinations of annotation files
+#
+rule combinations_of_annotation_files:
     input:
-        windows=rules.haplotype_coverage_over_windows.output,
-        annotation_files=expand(
-            rules.clean_annotation_files.output, anno=config["annotation_files"].keys()
-        ),
+        bed=rules.syntenic_and_callable.output,
+        anno1="temp/anno/{anno1}.bed.gz",
+        anno2="temp/anno/{anno2}.bed.gz",
     output:
-        temp("temp/annotated_windows.bed.gz"),
+        "results/annotation/combos/{sm}_{h}_intersection_{anno1}_and_{anno2}.bed.gz",
     log:
-        "logs/annotate_windows.log",
+        "logs/combo_{sm}_{h}_{anno1}_{anno2}.log",
     conda:
         "../envs/env.yml"
-    params:
-        annotation_names="\t".join(
-            [f"anno_{key}" for key in config["annotation_files"].keys()]
-        ),
     threads: 1
     shell:
         """
-        HEADER=$(gunzip -c {input.windows} | head -n 1 || :)
-        HEADER="${{HEADER}}\t{params.annotation_names}"
-        echo $HEADER
-
-        bedtools annotate -i {input.windows} \
-                -files {input.annotation_files} \
-            | bedtools sort -i - \
-            | sed "1s/^/${{HEADER}}\\n/" \
-            | gzip -c > {output}
+        bedtools intersect \
+            -sorted \
+            -a {input.bed} \
+            -b {input.anno1} \
+        | bedtools intersect \
+            -sorted \
+            -a - \
+            -b {input.anno2} \
+        | bedtools sort -i - \
+        | bedtools merge -i - \
+        | gzip -c \
+        > {output}
         """
 
 
-rule window_regions:
+rule size_of_combinations_of_annotation_files:
     input:
-        bed=rules.annotate_windows.output,
+        rules.combinations_of_annotation_files.output,
     output:
-        bed="results/windows.bed.gz",
+        temp("temp/regions/{sm}_{h}_intersection_{anno1}_and_{anno2}.tbl"),
     log:
-        "logs/window_regions.log",
+        "logs/combo_{sm}_{h}_{anno1}_{anno2}.log",
+    conda:
+        "../envs/env.yml"
+    threads: 1
+    shell:
+        """
+        printf "{wildcards.sm}_{wildcards.h}\t" > {output}
+        if [ {wildcards.anno1} == {wildcards.anno2} ]; then
+            printf "{wildcards.anno1}_size\t" >> {output}
+        else
+            printf "{wildcards.anno1}_{wildcards.anno2}_size\t" >> {output}
+        fi 
+        awk '{{sum += $3 - $2}}END{{print sum}}' <(gunzip -c {input}) >> {output}
+        """
+
+
+rule make_combos:
+    input:
+        combos=expand(
+            rules.size_of_combinations_of_annotation_files.output,
+            anno1=config["annotation_files"].keys(),
+            anno2=config["annotation_files"].keys(),
+            sm=tbl.index,
+            h=[1, 2],
+        ),
+    output:
+        "results/annotation/sizes.tbl",
+    log:
+        "logs/combo_sizes.log",
+    conda:
+        "../envs/env.yml"
+    shell:
+        """
+        printf "hap\tanno\tsize\n" > {output}
+        cat {input.combos} | sort >> {output}
+        """
+
+
+rule annotation_sizes_wide:
+    input:
+        rules.make_combos.output,
+    output:
+        "results/annotation/annotation_sizes_wide.tbl",
+    log:
+        "logs/combo_wide_sizes.log",
     threads: 1
     run:
-        df = pd.read_csv(str(input.bed), sep="\t")
-        anno_cols = [col for col in df.columns if col.startswith("anno_")]
-        df["region"] = "Other"
-        for anno in anno_cols:
-            df.loc[
-                (df[anno] >= 0.95) & (df["region"] == "Other"), "region"
-            ] = anno.strip("anno_")
-        u_condition = (
-            (df["anno_SD"] < 0.2) & (df["anno_Sat"] < 0.2) & (df["region"] == "Other")
-        )
-        df.loc[u_condition, "region"] = "Unique"
-        df.to_csv(output.bed, sep="\t", index=False)
+        df = pd.read_csv(str(input), sep="\t")
+        out = df.pivot(index="hap", columns="anno", values="size")
+        out.to_csv(str(output), sep="\t")
