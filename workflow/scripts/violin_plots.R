@@ -11,26 +11,22 @@ pop <- fread(infile2, fill = TRUE)
 
 df <- fread(infile) %>%
     mutate(Sample = gsub("_(1|2)", "", hap)) %>%
-    merge(pop, by = "Sample", all.x = T) %>%
-    mutate(SD = `SD # SNVs per kbp`, Unique = `Unique # SNVs per kbp`) %>%
-    pivot_longer(
-        cols = c("SD", "Unique"),
-    )
+    merge(pop, by = "Sample", all.x = T)
 
 p <- df %>%
     ggplot(
-        aes(x = name, y = value, color = name, fill = name)
+        aes(x = region, y = `# SNVs per 10 kbp`, color = region, fill = region)
     ) +
     geom_violin(alpha = 0.5) +
     geom_jitter(width = 0.2) +
     facet_row(~Superpopulation) +
-    scale_fill_manual(values = c(COLOR1, COLOR2)) +
-    scale_color_manual(values = c(COLOR1, COLOR2)) +
+    # scale_fill_manual(values = c(COLOR1, COLOR2)) +
+    # scale_color_manual(values = c(COLOR1, COLOR2)) +
     theme_cowplot() +
     theme(legend.position = "none") +
     xlab("") +
     ylab("# SNVs per kbp")
-
+p
 ggsave(outfile,
     plot = p,
     width = 9, height = 4,

@@ -79,7 +79,7 @@ rule size_of_combinations_of_annotation_files:
     input:
         rules.combinations_of_annotation_files.output,
     output:
-        temp("temp/regions/{sm}_{h}_intersection_{anno1}_and_{anno2}.tbl"),
+        tbl=temp("temp/regions/{sm}_{h}_intersection_{anno1}_and_{anno2}.tbl"),
     log:
         "logs/combo_{sm}_{h}_{anno1}_{anno2}.log",
     conda:
@@ -97,17 +97,27 @@ rule size_of_combinations_of_annotation_files:
         """
 
 
+def allowed_anno_combinations(wc):
+    file_fmt = rules.size_of_combinations_of_annotation_files.output.tbl
+    anno = config["annotation_files"].keys()
+    out = []
+    for sm in tbl.index:
+        for h in [1, 2]:
+            for a1 in anno:
+                for a2 in anno:
+                    f = (file_fmt).format(h=h, sm=sm, anno1=a1, anno2=a2)
+                    if a1 == a2 or a1 in ["SD", "sd"]:
+                        out.append(f)
+                    else:
+                        continue
+    return out
+
+
 rule make_combos:
     input:
-        combos=expand(
-            rules.size_of_combinations_of_annotation_files.output,
-            anno1=config["annotation_files"].keys(),
-            anno2=config["annotation_files"].keys(),
-            sm=tbl.index,
-            h=[1, 2],
-        ),
+        combos=allowed_anno_combinations,
     output:
-        "results/annotation/sizes.tbl",
+        "results/annotation/annotation_sizes.tbl",
     log:
         "logs/combo_sizes.log",
     conda:

@@ -1,24 +1,13 @@
 #
 # summary table
 #
-# rule region_sizes:
-#     input:
-#         rules.long_and_filtered_windows.output,
-#     output:
-#         "results/tables/region_sizes.tbl",
-#     log:
-#         "logs/region_sizes.log",
-#     conda:
-#         "envs/R.yml"
-#     threads: 8
-#     script:
-#         "scripts/region_sizes.R"
 rule make_summary_table:
     input:
         rules.all_snv.output,
-        rules.long_and_filtered_windows.output,
+        rules.make_combos.output,
     output:
         tbl="results/tables/snv_per_kbp.tbl",
+        wide="results/tables/snv_per_kbp_wide.tbl",
         html=report(
             directory("results/tables/"), category="Tables", htmlindex="index.html"
         ),

@@ -6,10 +6,12 @@ rule plot_cumulative_divergence:
         rules.long_and_filtered_windows.output,
     output:
         report(
-            "results/figures/cumulative_divergence.svg", category="Figures",
+            "results/figures/cumulative_divergence.svg",
+            category="Figures",
         ),
         report(
-            "results/figures/cumulative_divergence_per_hap.svg", category="Figures",
+            "results/figures/cumulative_divergence_per_hap.svg",
+            category="Figures",
         ),
     log:
         "logs/cumulative_divergence.log",
@@ -26,7 +28,8 @@ rule plot_callable_space:
         beds=expand(rules.syntenic_and_callable.output, sm=tbl.index, h=[1, 2]),
     output:
         report(
-            "results/figures/callable_space.svg", category="Figures",
+            "results/figures/callable_space.svg",
+            category="Figures",
         ),
     log:
         "logs/callable_space.log",
@@ -43,7 +46,8 @@ rule plot_violin:
         config["metadata"],
     output:
         report(
-            "results/figures/violin.svg", category="Figures",
+            "results/figures/violin.svg",
+            category="Figures",
         ),
     log:
         "logs/violin.log",
