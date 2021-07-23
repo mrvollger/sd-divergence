@@ -17,7 +17,7 @@ rule plot_cumulative_divergence:
         "logs/cumulative_divergence.log",
     conda:
         "../envs/R.yml"
-    threads: 1
+    threads: 8
     script:
         "../scripts/divergence_cum.R"
 
@@ -35,7 +35,7 @@ rule plot_callable_space:
         "logs/callable_space.log",
     conda:
         "../envs/R.yml"
-    threads: 1
+    threads: 8
     script:
         "../scripts/called_regions.R"
 
@@ -53,7 +53,7 @@ rule plot_violin:
         "logs/violin.log",
     conda:
         "../envs/R.yml"
-    threads: 1
+    threads: 8
     script:
         "../scripts/violin_plots.R"
 

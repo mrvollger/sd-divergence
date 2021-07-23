@@ -11,27 +11,31 @@ df <- fread(snv_f, showProgress = TRUE, nThread = threads) %>%
     mutate(hap = paste0(SAMPLE, gsub("h", "_", HAP))) %>%
     data.table()
 
-#
-# add paired annotation columns
-#
-anno_cols <- sort(names(df)[grepl("anno_", names(df))])
-for (anno in anno_cols) {
-    type <- gsub("anno_", "", anno)
-    if (type != "SD") {
-        new_col <- paste0("anno_SD+", type)
-        print(new_col)
-        df[[new_col]] <- 0
-        df[(anno_SD == 1 & df[[anno]] == 1), new_col] <- 1
+if (F) {
+    #
+    # add paired annotation columns
+    #
+    anno_cols <- sort(names(df)[grepl("anno_", names(df))])
+    for (anno in anno_cols) {
+        type <- gsub("anno_", "", anno)
+        if (type != "SD") {
+            new_col <- paste0("anno_SD+", type)
+            print(new_col)
+            df[[new_col]] <- 0
+            df[(anno_SD == 1 & df[[anno]] == 1), new_col] <- 1
+        }
     }
+    # remove columns that wont be annotated
+    df <- df[rowSums(df[, ..anno_cols]) > 0]
+    # get new longer pairs
+    paired_anno_cols <- sort(names(df)[grepl("anno_", names(df))])
 }
-# remove columns that wont be annotated
-df <- df[rowSums(df[, ..anno_cols]) > 0]
 #
 # make regions definitions
 #
-paired_anno_cols <- sort(names(df)[grepl("anno_", names(df))])
+paired_anno_cols <- c("anno_SD", "anno_Unique")
 keep_cols <- c("hap", "ID", paired_anno_cols)
-long_df <- df %>%
+df <- df[anno_SD > 0 | anno_Unique > 0] %>%
     select(all_of(keep_cols)) %>%
     pivot_longer(all_of(paired_anno_cols),
         names_to = "region",
@@ -49,7 +53,7 @@ region_sizes <- fread(sizes_f) %>%
     mutate(region = gsub("_", "+", gsub("_size", "", anno))) %>%
     data.table()
 
-out_df <- long_df %>%
+out_df <- df %>%
     merge(region_sizes, by = c("hap", "region")) %>%
     # , allow.cartesian = TRUE) %>%
     group_by(hap, region) %>%

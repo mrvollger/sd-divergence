@@ -20,11 +20,11 @@ p <- df %>%
     geom_violin(alpha = 0.5) +
     geom_jitter(width = 0.2) +
     facet_row(~Superpopulation) +
-    # scale_fill_manual(values = c(COLOR1, COLOR2)) +
-    # scale_color_manual(values = c(COLOR1, COLOR2)) +
+    scale_fill_manual(values = c(COLOR1, COLOR2)) +
+    scale_color_manual(values = c(COLOR1, COLOR2)) +
     theme_cowplot() +
     theme(legend.position = "none") +
-    xlab("")
+    xlab("Genomic region")
 
 ggsave(outfile,
     plot = p,
