@@ -22,11 +22,11 @@ p <- df %>%
     facet_row(~Superpopulation) +
     scale_fill_manual(values = c(COLOR1, COLOR2)) +
     scale_color_manual(values = c(COLOR1, COLOR2)) +
-    theme_cowplot() +
+    theme_minimal_hgrid() +
     theme(legend.position = "none") +
     xlab("Genomic region")
 
 ggsave(outfile,
     plot = p,
-    width = 9, height = 4,
+    width = 9, height = 5,
 )
