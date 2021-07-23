@@ -76,6 +76,7 @@ out_df_wide <- out_df %>%
 fwrite(out_df, outfile, sep = "\t", quote = FALSE, row.names = FALSE)
 fwrite(out_df_wide, outfile2, sep = "\t", quote = FALSE, row.names = FALSE)
 
+dir.create(outfile3, showWarnings = FALSE)
 fileConn <- file(paste0(outfile3, "/index.html"))
 x <- kable(out_df,
     format = "html",
