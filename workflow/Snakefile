@@ -29,6 +29,10 @@ if TEMP_DIR != "temp":
         shell("ln -s {TEMP_DIR} temp")
 
 
+assert "SD" in config["annotation_files"].keys(), "SD annotation not found"
+assert "Unique" in config["annotation_files"].keys(), "SD annotation not found"
+
+
 wildcard_constraints:
     sm="|".join(tbl.index),
 

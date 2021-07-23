@@ -7,3 +7,4 @@ min_syntenic_size: 1000000
 annotation_files:
   SD: .test/annotation/chm13_v1.1_plus38Y.SDs.bed.gz
   Sat: .test/annotation/chm13_v1.1_plus38Y.cen.bed.gz
+  Unique: .test/annotation/unique.bed.gz

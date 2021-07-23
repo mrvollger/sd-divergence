@@ -42,8 +42,8 @@ get_num_bp <- function(df) {
 }
 
 
-read_in_snv_windows <- function(infile) {
-    df <- fread(infile, showProgress = TRUE, nThread = snakemake@threads)
+read_in_snv_windows <- function(infile, threads = 4) {
+    df <- fread(infile, showProgress = TRUE, nThread = threads)
     df <- df %>%
         mutate(per_div = 1e2 * num_snv / (end - start)) %>%
         data.table()

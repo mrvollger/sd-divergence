@@ -24,9 +24,8 @@ p <- df %>%
     # scale_color_manual(values = c(COLOR1, COLOR2)) +
     theme_cowplot() +
     theme(legend.position = "none") +
-    xlab("") +
-    ylab("# SNVs per kbp")
-p
+    xlab("")
+
 ggsave(outfile,
     plot = p,
     width = 9, height = 4,

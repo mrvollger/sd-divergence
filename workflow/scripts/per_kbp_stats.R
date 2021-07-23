@@ -11,22 +11,47 @@ df <- fread(snv_f, showProgress = TRUE, nThread = threads) %>%
     mutate(hap = paste0(SAMPLE, gsub("h", "_", HAP))) %>%
     data.table()
 
+#
+# add paired annotation columns
+#
+anno_cols <- sort(names(df)[grepl("anno_", names(df))])
+for (anno in anno_cols) {
+    type <- gsub("anno_", "", anno)
+    if (type != "SD") {
+        new_col <- paste0("anno_SD+", type)
+        print(new_col)
+        df[[new_col]] <- 0
+        df[(anno_SD == 1 & df[[anno]] == 1), new_col] <- 1
+    }
+}
+# remove columns that wont be annotated
+df <- df[rowSums(df[, ..anno_cols]) > 0]
+#
+# make regions definitions
+#
+paired_anno_cols <- sort(names(df)[grepl("anno_", names(df))])
+keep_cols <- c("hap", "ID", paired_anno_cols)
+long_df <- df %>%
+    select(all_of(keep_cols)) %>%
+    pivot_longer(all_of(paired_anno_cols),
+        names_to = "region",
+        names_prefix = "anno_"
+    ) %>%
+    filter(value > 0) %>%
+    data.table()
+
+#
+# read in region sizes
+#
 sizes_f <- "results/annotation/annotation_sizes.tbl"
 sizes_f <- snakemake@input[[2]]
 region_sizes <- fread(sizes_f) %>%
-    ## separate(anno,
-    #   into = c("region", "second", "third"),
-    #   sep = "_",
-    #   remove = FALSE
-    # ) %>%
-    # filter(first >= second | second == "size") %>%
-    # filter(second == "size") %>%
-    # select(-second, -third) %>%
     mutate(region = gsub("_", "+", gsub("_size", "", anno))) %>%
     data.table()
 
-out_df <- df %>%
-    merge(region_sizes, allow.cartesian = TRUE) %>%
+out_df <- long_df %>%
+    merge(region_sizes, by = c("hap", "region")) %>%
+    # , allow.cartesian = TRUE) %>%
     group_by(hap, region) %>%
     summarize(
         "# SNVs" = n(),
