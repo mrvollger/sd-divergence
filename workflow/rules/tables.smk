@@ -20,8 +20,12 @@ rule make_summary_table_per_haplotype:
 
 rule make_summary_table:
     input:
-        rules.all_snv.output,
-        rules.make_combos.output,
+        long=expand(
+            rules.make_summary_table_per_haplotype.output.tbl, sm=tbl.index, h=[1, 2]
+        ),
+        wide=expand(
+            rules.make_summary_table_per_haplotype.output.wide, sm=tbl.index, h=[1, 2]
+        ),
     output:
         tbl="results/tables/snv_per_kbp.tbl",
         wide="results/tables/snv_per_kbp_wide.tbl",
