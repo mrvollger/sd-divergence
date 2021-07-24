@@ -35,6 +35,6 @@ p <- df %>%
 p
 ggsave(outfile,
     plot = p,
-    height = 5 * length(unique(df$facet_row)),
+    width = 5 * length(unique(df$facet_row)),
     height = 5 * length(unique(df$facet_row)),
 )
