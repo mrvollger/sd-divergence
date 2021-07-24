@@ -26,14 +26,15 @@ p <- df %>%
     ) +
     geom_violin(alpha = 0.5) +
     geom_jitter(width = 0.2) +
-    facet_grid(facet_row ~ Superpopulation, scales = "free_y") +
+    facet_grid(facet_row ~ Superpopulation, scales = "free") +
     scale_fill_manual(values = pcolors) +
     scale_color_manual(values = pcolors) +
     theme_minimal_hgrid() +
     theme(legend.position = "none") +
     xlab("Genomic region")
-
+p
 ggsave(outfile,
     plot = p,
-    width = 9, height = 5 * length(unique(df$facet_row)),
+    height = 5 * length(unique(df$facet_row)),
+    height = 5 * length(unique(df$facet_row)),
 )
