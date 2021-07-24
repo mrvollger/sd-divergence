@@ -46,7 +46,7 @@ rule plot_violin:
         config["metadata"],
     output:
         report(
-            "results/figures/violin.svg",
+            "results/figures/violin.pdf",
             category="Figures",
         ),
     log:
