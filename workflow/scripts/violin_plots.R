@@ -23,9 +23,10 @@ names(new_cols) <- new
 pcolors <- c(COLORS, new_cols)
 
 pdf(outfile, height = 5, width = 9)
-for (i in 1:length(unique(df$facet_row))) {
+for (i in unique(df$facet_row)) {
     print(i)
     p <- df %>%
+        filter(facet_row == i | region == "Unique") %>%
         ggplot(
             aes(
                 x = region,
@@ -35,14 +36,15 @@ for (i in 1:length(unique(df$facet_row))) {
         ) +
         geom_violin(alpha = 0.5) +
         geom_jitter(width = 0.2) +
+        facet_row(~Superpopulation) +
         # facet_grid(facet_row ~ Superpopulation, scales = "free") +
-        facet_grid_paginate(facet_row ~ Superpopulation,
-            nrow = 1,
-            ncol = length(unique(df$Superpopulation)),
-            # page = length(unique(df$facet_row)),
-            page = i,
-            scales = "free"
-        ) +
+        # facet_grid_paginate(facet_row ~ Superpopulation,
+        # nrow = 1,
+        # ncol = length(unique(df$Superpopulation)),
+        # page = length(unique(df$facet_row)),
+        # page = i,
+        # scales = "free"
+        # ) +
         scale_fill_manual(values = pcolors) +
         scale_color_manual(values = pcolors) +
         theme_minimal_hgrid() +
