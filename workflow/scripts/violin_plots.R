@@ -22,8 +22,15 @@ new_cols <- brewer.pal(length(new), "Spectral")
 names(new_cols) <- new
 pcolors <- c(COLORS, new_cols)
 
+df$facet_row <- factor(df$facet_row, levels = names(pcolors))
+
 pdf(outfile, height = 5, width = 9)
 for (i in unique(df$facet_row)) {
+    mbp <- round(df[df$region == i, "Mbp"], 2)
+    gbp <- round(df[df$region == "Unique", "Mbp"] / 1000, 2)
+    title <- glue("Mbp of {i} considered {min(mbp)} - {max(mbp)} \n")
+    subtitle <- glue("Gbp of unique considered {round(min(gbp),2)} - {round(max(gbp),2)}")
+    print(title)
     print(i)
     p <- df %>%
         filter(facet_row == i | region == "Unique") %>%
@@ -45,6 +52,7 @@ for (i in unique(df$facet_row)) {
         # page = i,
         # scales = "free"
         # ) +
+        ggtitle("", subtitle = paste(title, subtitle, sep = "\n")) +
         scale_fill_manual(values = pcolors) +
         scale_color_manual(values = pcolors) +
         theme_minimal_hgrid() +
