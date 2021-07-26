@@ -5,7 +5,7 @@ rule per_file_distance_snv:
     output:
         temp("temp/distance/{dist}/dist_{sm}_{h}.bed"),
     log:
-        "logs/distance/{dist}_{sm}_{h}_snv_dist.log",
+        "logs/distance/{dist}/dist_{sm}_{h}.log",
     conda:
         "../envs/env.yml"
     threads: 1
@@ -33,7 +33,7 @@ rule distance_snv:
     output:
         temp("temp/snv/{sm}_{h}/dist_{sm}_{h}.bed"),
     log:
-        "logs/distance/{sm}_{h}_snv_dist.log",
+        "logs/snv/{sm}_{h}/dist_{sm}_{h}.log",
     conda:
         "../envs/env.yml"
     threads: 1
@@ -65,7 +65,7 @@ rule all_snv:
         "logs/all_snv.log",
     conda:
         "../envs/env.yml"
-    threads: 1
+    threads: 8
     shell:
         """
         HEADER=$(head -n 1 {input.snv[1]} || :)
@@ -74,7 +74,7 @@ rule all_snv:
         sort -m -k 1,1 -k2,2n {input.snv} \
             | grep -v "^#" \
             | sed "1s/^/${{HEADER}}\\n/" \
-            | gzip -c \
+            | pigz -p {threads} \
             > {output}
         """
 
