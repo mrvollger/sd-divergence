@@ -85,29 +85,6 @@ rule annotate_snv:
         """
 
 
-rule all_snv:
-    input:
-        snv=expand(rules.annotate_snv.output, sm=tbl.index, h=[1, 2]),
-    output:
-        "results/all_snv_exploded.bed.gz",
-    log:
-        "logs/snv_count_windows.log",
-    conda:
-        "../envs/env.yml"
-    threads: 1
-    shell:
-        """
-        HEADER=$(head -n 1 {input.snv[1]} || :)
-        echo $HEADER
-
-        sort -m -k 1,1 -k2,2n {input.snv} \
-            | grep -v "^#" \
-            | sed "1s/^/${{HEADER}}\\n/" \
-            | gzip -c \
-            > {output}
-        """
-
-
 #
 # adding in the SNVs
 #

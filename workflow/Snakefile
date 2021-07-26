@@ -42,11 +42,13 @@ include: "rules/windows.smk"
 include: "rules/snv.smk"
 include: "rules/tables.smk"
 include: "rules/plots.smk"
+include: "rules/distance.smk"
 
 
 rule all:
     input:
         expand(rules.make_summary_table_per_haplotype.output, sm=tbl.index, h=[1, 2]),
+        rules.small_snv.output,
         annotation_sizes_wide=rules.annotation_sizes_wide.output,
         uncallable=rules.uncallable_windows.output,
         filtered_sv_pop_snv=expand(
