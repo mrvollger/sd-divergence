@@ -35,6 +35,8 @@ assert "Unique" in config["annotation_files"].keys(), "SD annotation not found"
 
 wildcard_constraints:
     sm="|".join(tbl.index),
+    dist="|".join(config["distance_files"].keys()),
+    anno="|".join(config["annotation_files"].keys()),
 
 
 include: "rules/regions.smk"
