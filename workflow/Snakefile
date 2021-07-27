@@ -56,6 +56,6 @@ rule all:
         filtered_sv_pop_snv=expand(
             rules.merge_filtered_snv_by_syntenic.output, sm=tbl.index
         ),
-        windows=rules.window_regions.output,
+        windows=rules.distance_windows.output,
         snv_table=rules.make_summary_table.output,
         plots=rules.plots.input,

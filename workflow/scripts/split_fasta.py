@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
         if args.maxheader is not None and len(name) > args.maxheader:
             raise IOError(
-                f"fasta header {name} is longer than {args.maxheader} characters. Please change your headers to be shorter than {args.maxheader} characters. (https://github.com/rmhubley/RepeatMasker/issues/59)"
+                f"fasta header {name} is longer than {args.maxheader}. Please change your headers to be shorter than {args.maxheader} characters. (https://github.com/rmhubley/RepeatMasker/issues/59)"
             )
 
         seq = fasta.fetch(name)

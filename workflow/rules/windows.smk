@@ -91,7 +91,7 @@ rule window_regions:
     input:
         bed=rules.annotate_windows.output,
     output:
-        bed="results/windows.bed.gz",
+        bed=temp("temp/no_dist_windows.bed.gz"),
     log:
         "logs/window_regions.log",
     threads: 1
@@ -104,7 +104,7 @@ rule window_regions:
                 (df[anno] >= 0.95) & (df["region"] == "Other"), "region"
             ] = anno.strip("anno_")
         u_condition = (
-            (df["anno_SD"] < 0.2) & (df["anno_Sat"] < 0.2) & (df["region"] == "Other")
+            (df["anno_SD"] < 0.0) & (df["anno_Sat"] < 0.2) & (df["region"] == "Other")
         )
         df.loc[u_condition, "region"] = "Unique"
         df.to_csv(output.bed, sep="\t", index=False)
@@ -129,4 +129,66 @@ rule uncallable_windows:
             -i <(bedtools merge -i {input.windows}) \
              -g <(cat {input.fai} | sort -k 1,1 -k2,2n ) \
             | gzip -c > {output}
+        """
+
+
+#
+# add distance to windows
+#
+rule per_file_distance_window:
+    input:
+        windows=rules.window_regions.output,
+        dist=rules.clean_distance_files.output,
+    output:
+        temp("temp/distance/{dist}/window_dist.bed"),
+    log:
+        "logs/distance/{dist}/window_dist.log",
+    conda:
+        "../envs/env.yml"
+    threads: 1
+    shell:
+        """
+        gunzip -c {input.windows} \
+            | grep -v "^#" \
+            | cut -f 1-3 \
+            | bedtools closest -d -t first \
+                -a - \
+                -b {input.dist} \
+            | cut -f 1-3,7 \
+            > {output}
+        """
+
+
+rule distance_windows:
+    input:
+        windows=rules.window_regions.output,
+        distances=expand(
+            rules.per_file_distance_window.output,
+            dist=config["distance_files"].keys(),
+            allow_missing=True,
+        ),
+    output:
+        temp("temp/distance_windows.bed.gz"),
+    log:
+        "logs/windows.log",
+    conda:
+        "../envs/env.yml"
+    threads: 8
+    params:
+        dist="\t".join([f"dist_{key}" for key in config["distance_files"].keys()]),
+        columns=",".join(
+            [str(4 * (i + 1)) for i in range(len(config["distance_files"].keys()))]
+        ),
+    shell:
+        """
+        HEADER=$(gunzip -c {input.windows} | head -n 1 || :)
+        HEADER="${{HEADER}}\t{params.dist}"
+        echo $HEADER
+
+        paste \
+            <(gunzip -c {input.windows} | grep -v "^#") \
+            <(paste {input.distances} | cut -f {params.columns} ) \
+            | sed "1s/^/${{HEADER}}\\n/" \
+            | pigz -p {threads} \
+            > {output}
         """

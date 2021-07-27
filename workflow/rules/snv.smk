@@ -90,7 +90,7 @@ rule annotate_snv:
 #
 rule add_snv_to_windows:
     input:
-        windows=rules.window_regions.output,
+        windows=rules.distance_windows.output,
         snv=rules.filter_snv_by_syntenic.output.snv,
     output:
         temp("temp/add_snv/{sm}_{h}_snvs_haplotype_coverage.bed"),
@@ -125,7 +125,7 @@ rule long_and_filtered_windows:
     input:
         snv=expand(rules.add_snv_to_windows.output, sm=tbl.index, h=[1, 2]),
     output:
-        snv="results/long_and_filtered_snv_over_windows.bed.gz",
+        snv="results/long_windows_with_snv_dist_annotation.bed.gz",
     log:
         "logs/long_and_filter.log",
     conda:

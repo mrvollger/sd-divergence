@@ -38,7 +38,7 @@ rule distance_snv:
         "../envs/env.yml"
     threads: 1
     params:
-        dist="\t".join(["dist_" + key for key in config["distance_files"].keys()]),
+        dist="\t".join([f"dist_{key}" for key in config["distance_files"].keys()]),
         columns=",".join(
             [str(4 * (i + 1)) for i in range(len(config["distance_files"].keys()))]
         ),
