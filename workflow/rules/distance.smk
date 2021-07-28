@@ -86,11 +86,18 @@ rule small_snv:
         "results/small_snv_exploded.bed.gz",
     log:
         "logs/small_snv.log",
-    threads: 1
-    run:
-        df = pd.read_csv(input[0], sep="\t")
-        dist_col = [
-            col for col in df if col.startswith("dist_") or col.startswith("anno_")
-        ]
-        names = ["#CHROM", "POS", "END", "REF", "ALT", "HAP", "SAMPLE"] + dist_col
-        df[names].to_csv(output[0], sep="\t", index=False, compression="gzip")
+    threads: 8
+    shell:
+        """
+        zcat {input} | cut -f 1-3,15,18- | pigz -p {threads} > {output}
+        """
+
+
+"""
+df = pd.read_csv(input[0], sep="\t")
+dist_col = [
+col for col in df if col.startswith("dist_") or col.startswith("anno_")
+]
+names = ["#CHROM", "POS", "END", "REF", "ALT", "HAP", "SAMPLE"] + dist_col
+df[names].to_csv(output[0], sep="\t", index=False, compression="gzip")
+"""

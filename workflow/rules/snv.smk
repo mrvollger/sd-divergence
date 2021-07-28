@@ -132,15 +132,19 @@ rule long_and_filtered_windows:
         "../envs/env.yml"
     params:
         names=" ".join(expand("{sm}_{h}", sm=tbl.index, h=[1, 2])),
-    threads: 1
+    resources:
+        mem=8
+    threads: 8
     shell:
         """
         HEADER=$(head -n 1 {input.snv[1]} || :)
         echo $HEADER
 
-        sort -m -k 1,1 -k2,2n {input.snv} \
+        sort -m -k 1,1 -k2,2n \
+            -S {recources.mem} --parallel {threads} \
+            {input.snv} \
             | grep -v "^#" \
             | sed "1s/^/${{HEADER}}\\n/" \
-            | gzip -c \
+            | pigz -p {threads} \
             > {output}
         """
