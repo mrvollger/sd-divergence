@@ -22,4 +22,5 @@ dependencies:
   - bioconductor-karyoploter
   - r-ggforce
   - r-knitr
+  - r-ggridges
   

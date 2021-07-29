@@ -14,6 +14,14 @@ df <- fread(infile, nThread = 16) %>%
     summarise(num_snv = sum(num_snv)) %>%
     data.table()
 
+dim(df)
+min(abs(
+    df %>%
+        group_by(region) %>%
+        summarise(min = min(dist_TSS), max = max(dist_TSS)) %>%
+        select(-region)
+)) / 1e6
+
 max_dist <- 1e6
 range <- 10^(seq(1, log10(max_dist), .25))
 range <- seq(-max_dist, max_dist, 1e4)
@@ -81,24 +89,32 @@ ggsave(outfile1, plot = p, height = 10, width = 12)
 
 density <- dsmall %>%
     ggplot(aes(x = dist_TSS, fill = region, color = region, weight = num_snv)) +
-    geom_density(alpha = 0.3) +
+    geom_density_ridges(aes(y = region), alpha = 0.5) +
     scale_fill_manual(values = COLORS) +
     scale_color_manual(values = COLORS) +
     scale_x_continuous(label = comma) +
-    ylab("Density of SNVs") +
+    ylab("# of observations") +
     xlab("") +
-    theme_minimal_hgrid() +
+    theme_minimal_grid() +
     theme(legend.position = "none")
 
 p2 <- dsmall %>%
-    ggplot(aes(x = dist_TSS, y = divergence, fill = region, color = region)) +
-    geom_smooth(n = 300) +
+    ggplot(
+        aes(x = dist_TSS, y = divergence, fill = region, color = region)
+    ) +
+    geom_smooth(n = 5000) +
     scale_fill_manual(values = COLORS) +
     scale_color_manual(values = COLORS) +
     scale_x_continuous(label = comma) +
+    geom_point(
+        data = dsmall %>% filter(region == "SD", divergence < 25),
+        # aes(x = dist_TSS, y = divergence, fill = region, color = region),
+        size = 0.1, alpha = 0.1
+    ) +
     ylab("SNV per 10 kbp") +
     xlab("Genomic distance from TSS") +
-    theme_minimal_hgrid() +
+    facet_col(~region, scales = "free_y") +
+    theme_minimal_grid() +
     theme(legend.position = "none")
 
 outfile2 <- "~/public_html/share/smoothed_dist_from_tss.pdf"
@@ -106,7 +122,7 @@ outfile2 <- snakemake@output[2]
 
 ggsave(outfile2,
     plot = cowplot::plot_grid(density, p2, rel_heights = c(1, 3), ncol = 1, align = "v"),
-    height = 8, width = 8
+    height = 10, width = 12
 )
 
 p3 <- dsmall %>%

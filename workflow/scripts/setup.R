@@ -11,6 +11,7 @@ library(ggforce)
 library(tidyr)
 library(knitr)
 library(ggrepel)
+library(ggridges)
 
 
 # colors to use

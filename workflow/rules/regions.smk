@@ -43,22 +43,6 @@ rule clean_annotation_files:
         """
 
 
-rule clean_distance_files:
-    input:
-        annotation_file=lambda w: config["distance_files"][w.dist],
-    output:
-        temp("temp/distance/{dist}.bed.gz"),
-    log:
-        "logs/clean_distance_files.{dist}.log",
-    conda:
-        "../envs/env.yml"
-    threads: 1
-    shell:
-        """
-        bedtools sort -i {input.annotation_file} \
-            | gzip -c > {output}
-        """
-
 
 #
 # combinations of annotation files
