@@ -133,7 +133,7 @@ rule long_and_filtered_windows:
     params:
         names=" ".join(expand("{sm}_{h}", sm=tbl.index, h=[1, 2])),
     resources:
-        mem=8
+        mem=8,
     threads: 8
     shell:
         """
