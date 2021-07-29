@@ -144,13 +144,17 @@ rule per_file_distance_window:
     threads: 1
     shell:
         """
+        NUM_COL=$(gunzip -c {input.dist} | head -n 1 | awk '{{print NF}}' || :)
+        LAST_COL=$((NUM_COL+4))
+        echo $NUM_COL, $LAST_COL 
+
         gunzip -c {input.windows} \
             | grep -v "^#" \
             | cut -f 1-3 \
-            | bedtools closest -d -t first \
+            | bedtools closest -D b -t first \
                 -a - \
                 -b {input.dist} \
-            | cut -f 1-3,7 \
+            | cut -f 1,2,3,$LAST_COL \
             > {output}
         """
 

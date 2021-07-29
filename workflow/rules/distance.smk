@@ -11,12 +11,16 @@ rule per_file_distance_snv:
     threads: 1
     shell:
         """
+        NUM_COL=$(gunzip -c {input.dist} | head -n 1 | awk '{{print NF}}' || :)
+        LAST_COL=$((NUM_COL+4))
+        echo $NUM_COL, $LAST_COL 
+
         gunzip -c {input.snv} \
             | cut -f 1-3 \
             | bedtools closest -D b -t first \
                 -a - \
                 -b {input.dist} \
-            | cut -f 1-3,7 \
+            | cut -f 1-3,$LAST_COL \
             | bedtools sort -i - \
             > {output}
         """

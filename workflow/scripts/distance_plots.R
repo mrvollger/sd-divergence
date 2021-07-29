@@ -29,7 +29,7 @@ dsmall <- df %>%
         divergence = 1e4 * f,
         pi = 2 * f * (1 - f) * hap_count / (hap_count - 1)
     )
-
+dsmall
 plot.df <- dsmall %>%
     mutate(
         bucket = cut(
