@@ -45,9 +45,9 @@ wildcard_constraints:
 include: "rules/regions.smk"
 include: "rules/windows.smk"
 include: "rules/snv.smk"
+include: "rules/distance.smk"
 include: "rules/tables.smk"
 include: "rules/plots.smk"
-include: "rules/distance.smk"
 
 
 rule all:
