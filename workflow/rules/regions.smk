@@ -43,7 +43,6 @@ rule clean_annotation_files:
         """
 
 
-
 #
 # combinations of annotation files
 #

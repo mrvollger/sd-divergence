@@ -126,4 +126,3 @@ rule uncallable_windows:
              -g <(cat {input.fai} | sort -k 1,1 -k2,2n ) \
             | gzip -c > {output}
         """
-

@@ -83,4 +83,3 @@ rule annotate_snv:
             | sed "1s/^/${{HEADER}}\\n/" \
             > {output}
         """
-
