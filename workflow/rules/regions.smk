@@ -56,7 +56,6 @@ rule clean_distance_files:
     shell:
         """
         bedtools sort -i {input.annotation_file} \
-            | cut -f 1-3 \
             | gzip -c > {output}
         """
 

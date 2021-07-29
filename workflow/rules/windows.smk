@@ -103,10 +103,6 @@ rule window_regions:
             df.loc[
                 (df[anno] >= 0.95) & (df["region"] == "Other"), "region"
             ] = anno.strip("anno_")
-        u_condition = (
-            (df["anno_SD"] < 0.0) & (df["anno_Sat"] < 0.2) & (df["region"] == "Other")
-        )
-        df.loc[u_condition, "region"] = "Unique"
         df.to_csv(output.bed, sep="\t", index=False)
 
 

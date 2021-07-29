@@ -16,6 +16,9 @@ config["sm"] = list(tbl.index)
 fai = f"{config['ref']}.fai"
 assert os.path.exists(fai), f"{fai} not found"
 
+#df.fai = pd.read_csv(fai,sep="\t", header=None)
+
+
 TEMP_DIR = config.pop("tempdir", "temp")
 if TEMP_DIR != "temp":
     if os.path.exists("temp"):

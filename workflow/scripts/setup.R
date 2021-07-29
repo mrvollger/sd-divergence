@@ -10,6 +10,7 @@ library(GenomicRanges, quietly = TRUE)
 library(ggforce)
 library(tidyr)
 library(knitr)
+library(ggrepel)
 
 
 # colors to use

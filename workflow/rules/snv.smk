@@ -141,7 +141,7 @@ rule long_and_filtered_windows:
         echo $HEADER
 
         sort -m -k 1,1 -k2,2n \
-            -S {recources.mem} --parallel {threads} \
+            --batch-size=500 --parallel {threads} \
             {input.snv} \
             | grep -v "^#" \
             | sed "1s/^/${{HEADER}}\\n/" \

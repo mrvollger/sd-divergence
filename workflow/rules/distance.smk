@@ -13,7 +13,7 @@ rule per_file_distance_snv:
         """
         gunzip -c {input.snv} \
             | cut -f 1-3 \
-            | bedtools closest -d -t first \
+            | bedtools closest -D b -t first \
                 -a - \
                 -b {input.dist} \
             | cut -f 1-3,7 \

@@ -7,3 +7,7 @@ temp/**
 .Rhistory
 .DS_Store
 Rplots.pdf
+reference/**
+report/**
+config/annotations/**
+old_run/**
