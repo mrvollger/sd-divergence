@@ -34,7 +34,10 @@ COLORS <- c(
     RM = ORANGE,
     Other = "grey"
 )
-
+TWOC <- c(
+    Unique = COLOR2,
+    SD = COLOR1
+)
 
 get_num_bp <- function(df) {
     gr <- GenomicRanges::reduce(toGRanges(as.data.table(df)))
