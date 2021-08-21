@@ -5,6 +5,7 @@ rule syntenic_and_callable:
     input:
         callable=lambda w: tbl.loc[w.sm][f"h{w.h}_callable"],
         aln=lambda w: tbl.loc[w.sm][f"h{w.h}_aln"],
+        exclude=config["exclude"],
     output:
         "results/syntenic_and_callable/{sm}_{h}.bed.gz",
     log:
@@ -18,6 +19,7 @@ rule syntenic_and_callable:
         """
         bedtools intersect -a {input.callable} \
             -b <( bedtools sort -i {input.aln} | awk '$3 - $2 >= {params.min_syntenic_size}' ) \
+            | bedtools intersect -v -a - -b {input.exclude} \
             | bedtools sort -i - \
             | bedtools merge -i - \
             | sed 's/$/\\t{wildcards.sm}_{wildcards.h}/g' \
