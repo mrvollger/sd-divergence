@@ -16,6 +16,7 @@ rule filter_snv_by_syntenic:
     input:
         snv=rules.explode_snv.output.snv,
         callable=rules.syntenic_and_callable.output,
+        exclude=config["exclude"],
     output:
         snv=temp("temp/syntenic_and_callable/snv_{sm}_{h}.bed.gz"),
     log:
@@ -31,6 +32,7 @@ rule filter_snv_by_syntenic:
                 -a - \
                 -b <(gunzip -c {input.callable}) \
                 -header \
+            | bedtools intersect -v -a - -b {input.exclude} \
             | bedtools sort -header -i - \
         | gzip -c > {output}
         """

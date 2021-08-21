@@ -1,6 +1,7 @@
 rule make_windows:
     input:
         fai=f"{config['ref']}.fai",
+        exclude=config["exclude"],
     output:
         temp("temp/windows.bed.gz"),
     log:
@@ -14,6 +15,7 @@ rule make_windows:
     shell:
         """
         bedtools makewindows -g {input.fai} -w {params.window_size} -s {params.step_size} \
+            | bedtools intersect -v -a - -b {input.exclude} \
             | bedtools sort -i - \
             | gzip -c > {output}
         """
