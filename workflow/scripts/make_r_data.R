@@ -2,7 +2,7 @@ library(tidyverse)
 library(dplyr)
 library(data.table)
 
-read_bed_file <- function(infile, threads = 1) {
+read_bed_file <- function(infile, threads = 8) {
     df <- data.table::fread(infile, nThread = threads, stringsAsFactors = TRUE)
     chrs <- paste("chr", c(1:22, "X", "Y", "M"), sep = "")
     colnames(df)[1:3] <- c("chr", "start", "end")
