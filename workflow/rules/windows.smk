@@ -15,7 +15,7 @@ rule make_windows:
     shell:
         """
         bedtools makewindows -g {input.fai} -w {params.window_size} -s {params.step_size} \
-            | bedtools intersect -v -a - -b {input.exclude} \
+            | bedtools intersect -header -v -a - -b {input.exclude} \
             | bedtools sort -i - \
             | gzip -c > {output}
         """

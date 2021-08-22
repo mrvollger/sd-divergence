@@ -32,7 +32,7 @@ rule filter_snv_by_syntenic:
                 -a - \
                 -b <(gunzip -c {input.callable}) \
                 -header \
-            | bedtools intersect -v -a - -b {input.exclude} -header \
+            | bedtools intersect -header -v -a - -b {input.exclude} \
             | bedtools sort -header -i - \
         | gzip -c > {output}
         """
