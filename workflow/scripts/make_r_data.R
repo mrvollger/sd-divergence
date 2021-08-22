@@ -1,24 +1,34 @@
 library(tidyverse)
 library(dplyr)
 library(data.table)
+library(tzdb)
+library(vroom)
 
-read_bed_file <- function(infile, threads = 8) {
-    df <- data.table::fread(infile,
-        nThread = threads,
-        stringsAsFactors = TRUE,
-        showProgress = TRUE
-    )
+clean_bed_df <- function(df) {
     chrs <- paste("chr", c(1:22, "X", "Y", "M"), sep = "")
     colnames(df)[1:3] <- c("chr", "start", "end")
-    levels(df$chr) <- chrs
+    df$chr <- factor(df$chr, levels = chrs)
     if ("chr1" %in% colnames(df)) {
-        levels(df$chr1) <- chrs
+        df$chr1 <- factor(df$chr1, levels = chrs)
     }
     if ("chr2" %in% colnames(df)) {
-        levels(df$chr2) <- chrs
+        df$chr2 <- factor(df$chr2, levels = chrs)
     }
     # remove dup cols
     df[, !duplicated(colnames(df)), with = FALSE]
+}
+
+read_bed_file <- function(infile, threads = 8) {
+    # df <- data.table::fread(infile,
+    #    nThread = threads,
+    #    stringsAsFactors = TRUE,
+    #    showProgress = TRUE
+    # )
+    clean_bed_df(
+        data.table(
+            vroom(infile, num_threads = threads)
+        )
+    )
 }
 longf <- "/Users/mrvollger/Desktop/EichlerVolumes/chm13_t2t/nobackups/sd-divergence/results/long_windows_with_snv_dist_annotation.bed.gz" # nolint
 

@@ -24,3 +24,5 @@ dependencies:
   - r-knitr
   - r-ggridges
   - r::r-zoo
+  - r-vroom
+  - r-tzdb
