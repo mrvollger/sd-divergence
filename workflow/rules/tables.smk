@@ -47,7 +47,9 @@ rule make_r_data:
         snv=rules.small_snv.output,
         long=rules.long_and_filtered_windows.output,
     output:
-        rdata="results/image.Rdata",
+        windows="results/Rdata/windows.Rdata",
+        tbl="results/Rdata/tbl.Rdata",
+        snv="results/Rdata/snv.Rdata",
     log:
         "logs/rdata.log",
     conda:
