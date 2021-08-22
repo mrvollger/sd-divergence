@@ -16,7 +16,6 @@ read_bed_file <- function(infile, threads = 8) {
     # remove dup cols
     df[, !duplicated(colnames(df)), with = FALSE]
 }
-
 longf <- "/Users/mrvollger/Desktop/EichlerVolumes/chm13_t2t/nobackups/sd-divergence/results/long_windows_with_snv_dist_annotation.bed.gz" # nolint
 
 snvf <- "/Users/mrvollger/Desktop/EichlerVolumes/chm13_t2t/nobackups/sd-divergence/results/small_snv_exploded.bed.gz" # nolint
@@ -29,10 +28,16 @@ snvf <- snakemake@input$snv
 tblf <- snakemake@input$tbl
 dataf <- snakemake@output$rdata
 
+cat("Reading windows")
 df_w <- read_bed_file(longf)
-df_snv <- read_bed_file(snvf)
+
+cat("Reading table")
 df_tbl <- fread(tblf)
 
+cat("Reading SNVs")
+df_snv <- read_bed_file(snvf)
+
+cat("Saving data")
 save.image(dataf)
 
 if (T) {
