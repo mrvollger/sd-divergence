@@ -39,3 +39,19 @@ rule make_summary_table:
     threads: 8
     script:
         "../scripts/per_kbp_stats.R"
+
+
+rule make_r_data:
+    input:
+        tbl=rules.make_summary_table.output.tbl,
+        snv=rules.small_snv.output,
+        long=rules.long_and_filtered_windows.output,
+    output:
+        rdata="results/image.Rdata",
+    log:
+        "logs/rdata.log",
+    conda:
+        "../envs/R.yml"
+    threads: 8
+    script:
+        "../scripts/make_r_data.R"

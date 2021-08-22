@@ -62,3 +62,4 @@ rule all:
         windows=rules.distance_windows.output,
         snv_table=rules.make_summary_table.output,
         plots=rules.plots.input,
+        r_data=rules.make_r_data.output,
