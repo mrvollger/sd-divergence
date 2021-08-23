@@ -55,7 +55,7 @@ df_snv <- read_bed_file(snvf)
 save(df_snv, file = snakemake@output$snv)
 
 
-if (T) {
+if (F) {
     outfile <- "~/Desktop/EichlerVolumes/chm13_t2t/nobackups/sd-divergence/misc_scripts/anno.snv_total.bed" # nolint
     df_w_snv <- df_w %>%
         group_by_at(setdiff(names(df_w), c("num_snv", "hap"))) %>%
