@@ -61,9 +61,25 @@ rule make_chain:
         """
 
 
-rule subset_vcf:
+rule setup_vcf:
     input:
         vcf=VCF,
+    output:
+        vcf=temp("temp/mutyper/all.vcf.gz"),
+    log:
+        "logs/mutyper/vcf.log",
+    conda:
+        "../envs/env.yml"
+    shell:
+        """
+        zcat {input.vcf} | bgzip > {output.vcf}
+        tabix -p vcf {output.vcf}
+        """
+
+
+rule subset_vcf:
+    input:
+        vcf=rules.setup_vcf.output.vcf,
         chain=rules.make_chain.output.chain,
     output:
         vcf=temp("temp/mutyper/vcf/{rn}-{an}.vcf"),
@@ -75,10 +91,9 @@ rule subset_vcf:
         "subset"
     shell:
         """
-        bedtools intersect \
-            -header \
-            -a {input.vcf} \
-            -b <(head -n 1 {input.chain} | cut -d" " -f 3,6,7  | sed 's/ /\t/g') \
+        tabix \
+            {input.vcf} \
+            $(head -n 1 {input.chain} | cut -d" " -f 3,6,7  | awk '{{print $1:$2-$3}}') \
         > {output}
         """
 
