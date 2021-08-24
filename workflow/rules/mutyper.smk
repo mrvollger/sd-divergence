@@ -97,7 +97,7 @@ rule subset_vcf:
             $(head -n 1 {input.chain} \
                 | cut -d" " -f 3,6,7  \
                 | sed 's/ /\t/g' \
-                | awk '{{print $1:$2-$3}}' \
+                | awk '{{print $1":"$2"-"$3}}' \
             ) \
         > {output}
         """
