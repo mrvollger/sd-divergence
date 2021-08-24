@@ -164,15 +164,32 @@ rule annotated_vcf:
     log:
         "logs/mutyper/annotated_vcf.log",
     conda:
+        "../envs/env.yml"
+    shell:
+        """
+        bcftools concat -a \
+            {input.vcf} \
+            | bgzip > {output.vcf}
+        tabix -p vcf {output.vcf}
+        """
+
+
+rule mutyper_spectra:
+    input:
+        vcf=rules.annotated_vcf.output.vcf,
+    output:
+        spectra="results/mutyper/spectra.txt",
+    log:
+        "logs/mutyper/spectra.log",
+    conda:
         "../envs/mutyper.yml"
     shell:
         """
-        bcftools concat {input.vcf} \
-            | bgzip > {output.vcf}
-        tabix -p vcf {output.vcf}
+        mutyper spectra {input.vcf} > {output.spectra}
         """
 
 
 rule mutyper_setup:
     input:
         rules.annotated_vcf.output,
+        rules.mutyper_spectra.output,
