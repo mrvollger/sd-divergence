@@ -49,7 +49,7 @@ rule make_ancestor:
         reference=REF,
         ancestor=ANCESTRAL,
     output:
-        chain="temp/mutyper/ancestral_fasta/{rn}-{an}.fa",
+        fasta="temp/mutyper/ancestral_fasta/{rn}-{an}.fa",
     log:
         "logs/mutyper/ancestral_fasta/{rn}-{an}.log",
     conda:
