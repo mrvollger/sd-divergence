@@ -44,7 +44,7 @@ rule make_chain:
     input:
         psl=rules.make_psl.output.psl,
     output:
-        chain=pipe("temp/mutyper/chain/{rn}-{an}.chain"),
+        chain=temp("temp/mutyper/chain/{rn}-{an}.chain"),
     log:
         "logs/mutyper/chain/{rn}-{an}.log",
     conda:
@@ -59,9 +59,28 @@ rule make_chain:
         """
 
 
-rule make_ancestor:
+rule subset_vcf:
     input:
         vcf=VCF,
+        chain=rules.make_chain.output.chain,
+    output:
+        vcf=temp("temp/mutyper/vcf/{rn}-{an}.vcf"),
+    log:
+        "logs/mutyper/vcf/{rn}-{an}.log",
+    conda:
+        "../envs/env.yml"
+    shell:
+        """
+        bedtools intersect \
+            -a {input.vcf} \
+            -b <(head -n 1 {input.chain} | cut -d" " -f 3,6,7  | sed 's/ /\t/g') \
+        > {output}
+        """
+
+
+rule make_ancestor:
+    input:
+        vcf=rules.subset_vcf.output.vcf,
         sam=SAM,
         chain=rules.make_chain.output.chain,
         reference=REF,
