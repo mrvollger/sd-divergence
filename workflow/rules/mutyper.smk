@@ -49,6 +49,8 @@ rule make_chain:
         "logs/mutyper/chain/{rn}-{an}.log",
     conda:
         "../envs/env.yml"
+    group:
+        "subset"
     shell:
         """
         module load ucsc
@@ -69,6 +71,8 @@ rule subset_vcf:
         "logs/mutyper/vcf/{rn}-{an}.log",
     conda:
         "../envs/env.yml"
+    group:
+        "subset"
     shell:
         """
         bedtools intersect \
@@ -93,6 +97,8 @@ rule make_ancestor:
         "logs/mutyper/ancestral_fasta/{rn}-{an}.log",
     conda:
         "../envs/mutyper.yml"
+    group:
+        "subset"
     shell:
         """
         samtools faidx {input.reference} {wildcards.rn} | seqtk seq -l 60 > {output.rn}
