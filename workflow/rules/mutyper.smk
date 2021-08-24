@@ -111,8 +111,8 @@ rule make_ancestor:
         reference=REF,
         ancestor=ANCESTRAL,
     output:
-        an="temp/mutyper/ancestral_fasta/an_{rn}-{an}.fa",
-        rn="temp/mutyper/ancestral_fasta/rn_{rn}-{an}.fa",
+        an=temp("temp/mutyper/ancestral_fasta/an_{rn}-{an}.fa"),
+        rn=temp("temp/mutyper/ancestral_fasta/rn_{rn}-{an}.fa"),
         fasta="temp/mutyper/ancestral_fasta/{rn}-{an}.fa",
     log:
         "logs/mutyper/ancestral_fasta/{rn}-{an}.log",
@@ -134,13 +134,32 @@ rule make_ancestor:
         """
 
 
-def get_mutyper_fastas(wc):
+rule annotate_vcf:
+    input:
+        vcf=rules.subset_vcf.output.vcf,
+        fasta=rules.make_ancestor.output.fasta,
+    output:
+        vcf="temp/mutyper/anno_vcf/{rn}-{an}.vcf.gz",
+        tbi="temp/mutyper/anno_vcf/{rn}-{an}.vcf.gz.tbi",
+    log:
+        "logs/mutyper/annotate_vcf/{rn}-{an}.log",
+    conda:
+        "../envs/mutyper.yml"
+    shell:
+        """
+        mutyper variants {input.fasta} {input.vcf} \
+            | bgzip > {output.vcf}
+        tabix -p vcf {output.vcf}
+        """
+
+
+def get_mutyper_rtn(wc):
     for an, rn in pairs:
         if rn == "*" or an == "*" or an == "h1tg000047l":
             continue
-        yield (rules.make_ancestor.output.fasta).format(rn=rn, an=an)
+        yield (rules.annotate_vcf.output.vcf).format(rn=rn, an=an)
 
 
 rule mutyper_setup:
     input:
-        fastas=get_mutyper_fastas,
+        rtn=get_mutyper_rtn,
