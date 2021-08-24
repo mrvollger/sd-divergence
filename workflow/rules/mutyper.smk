@@ -57,7 +57,7 @@ rule make_chain:
         grep -w {wildcards.rn} {input.psl} \
             | grep -w {wildcards.an} \
             | pslToChain /dev/stdin \
-            {output} || touch {output} 
+            {output}
         """
 
 
@@ -136,7 +136,7 @@ rule make_ancestor:
 
 def get_mutyper_fastas(wc):
     for an, rn in pairs:
-        if rn == "*" or an == "*":
+        if rn == "*" or an == "*" or an == "h1tg000047l":
             continue
         yield (rules.make_ancestor.output.fasta).format(rn=rn, an=an)
 
