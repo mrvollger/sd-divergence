@@ -49,8 +49,6 @@ rule make_chain:
         "logs/mutyper/chain/{rn}-{an}.log",
     conda:
         "../envs/env.yml"
-    group:
-        "subset"
     shell:
         """
         module load ucsc
@@ -88,8 +86,6 @@ rule subset_vcf:
         "logs/mutyper/vcf/{rn}-{an}.log",
     conda:
         "../envs/env.yml"
-    group:
-        "subset"
     shell:
         """
         tabix -h \
@@ -119,8 +115,6 @@ rule make_ancestor:
         "logs/mutyper/ancestral_fasta/{rn}-{an}.log",
     conda:
         "../envs/mutyper.yml"
-    group:
-        "subset"
     shell:
         """
         samtools faidx {input.reference} {wildcards.rn} | seqtk seq -l 60 > {output.rn}
@@ -161,6 +155,24 @@ def get_mutyper_rtn(wc):
         yield (rules.annotate_vcf.output.vcf).format(rn=rn, an=an)
 
 
+rule annotated_vcf:
+    input:
+        vcf=get_mutyper_rtn,
+    output:
+        vcf="results/mutyper/anno_vcf.vcf.gz",
+        tbi="results/mutyper/anno_vcf.vcf.gz.tbi",
+    log:
+        "logs/mutyper/annotate_vcf/{rn}-{an}.log",
+    conda:
+        "../envs/mutyper.yml"
+    shell:
+        """
+        bcftools concat {input.vcf} \
+            | bgzip > {output.vcf}
+        tabix -p vcf {output.vcf}
+        """
+
+
 rule mutyper_setup:
     input:
-        rtn=get_mutyper_rtn,
+        rules.annotated_vcf.output,
