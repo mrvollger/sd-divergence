@@ -49,8 +49,8 @@ rule make_ancestor:
         reference=REF,
         ancestor=ANCESTRAL,
     output:
-        an="temp/mutyper/ancestral_fasta/{an}.fa",
-        rn="temp/mutyper/ancestral_fasta/{rn}.fa",
+        an="temp/mutyper/ancestral_fasta/an_{rn}-{an}.fa",
+        rn="temp/mutyper/ancestral_fasta/rn_{rn}-{an}.fa",
         fasta="temp/mutyper/ancestral_fasta/{rn}-{an}.fa",
     log:
         "logs/mutyper/ancestral_fasta/{rn}-{an}.log",
