@@ -49,6 +49,8 @@ rule make_ancestor:
         reference=REF,
         ancestor=ANCESTRAL,
     output:
+        an="temp/mutyper/ancestral_fasta/{an}.fa",
+        rn="temp/mutyper/ancestral_fasta/{rn}.fa",
         fasta="temp/mutyper/ancestral_fasta/{rn}-{an}.fa",
     log:
         "logs/mutyper/ancestral_fasta/{rn}-{an}.log",
@@ -56,10 +58,13 @@ rule make_ancestor:
         "../envs/mutyper.yml"
     shell:
         """
+        samtools faidx {input.reference} {wildcards.rn} > {output.rn}
+        samtools faidx {input.ancestor} {wildcards.an} > {output.an}
+
         mutyper ancestor \
             {input.vcf} \
-             <(samtools faidx {wildcards.rn} {input.reference}) \
-             <(samtools faidx {wildcards.an} {input.ancestor}) \
+            {output.rn} \
+            {output.an} \
              {input.chain} \
          {output.fasta}
         """

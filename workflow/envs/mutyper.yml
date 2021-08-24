@@ -6,5 +6,6 @@ dependencies:
   - libcurl
   - bzip2
   - pip
+  - pysam
   - pip:
       - mutyper
