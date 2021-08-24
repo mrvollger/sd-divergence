@@ -66,7 +66,7 @@ rule subset_vcf:
         vcf=VCF,
         chain=rules.make_chain.output.chain,
     output:
-        vcf=temp("temp/mutyper/vcf/{rn}-{an}.vcf"),
+        vcf=pipe("temp/mutyper/vcf/{rn}-{an}.vcf"),
     log:
         "logs/mutyper/vcf/{rn}-{an}.log",
     conda:
