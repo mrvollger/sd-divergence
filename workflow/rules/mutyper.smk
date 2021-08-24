@@ -66,6 +66,7 @@ rule setup_vcf:
         vcf=VCF,
     output:
         vcf=temp("temp/mutyper/all.vcf.gz"),
+        tbi=temp("temp/mutyper/all.vcf.gz.tbi"),
     log:
         "logs/mutyper/vcf.log",
     conda:
