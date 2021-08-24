@@ -21,13 +21,13 @@ samtools view  \
 pairs = [line.strip().split() for line in open(PAIRS)]
 
 
-rule make_chain:
+rule make_psl:
     input:
         sam=SAM,
     output:
-        chain="temp/mutyper/clint.chain",
+        psl=temp("temp/mutyper/psl/clint.psl"),
     log:
-        "logs/mutyper/chain.log",
+        "logs/mutyper/psl.log",
     conda:
         "../envs/env.yml"
     shell:
@@ -35,7 +35,25 @@ rule make_chain:
         module load ucsc
         samtools view -b \
             <(zcat {input.sam}) \
-            | bamToPsl /dev/stdin /dev/stdout \
+            | bamToPsl /dev/stdin \
+            {output}  
+        """
+
+
+rule make_chain:
+    input:
+        psl=rules.make_psl.output.psl,
+    output:
+        chain="temp/mutyper/psl/{rn}-{an}.chain",
+    log:
+        "logs/mutyper/chain.log",
+    conda:
+        "../envs/env.yml"
+    shell:
+        """
+        module load ucsc
+        grep -w {wildcards.rn} {input.psl} \
+            | grep -w {wildcards.an} \
             | pslToChain /dev/stdin \
             {output}  
         """
@@ -58,8 +76,8 @@ rule make_ancestor:
         "../envs/mutyper.yml"
     shell:
         """
-        samtools faidx {input.reference} {wildcards.rn} > {output.rn}
-        samtools faidx {input.ancestor} {wildcards.an} > {output.an}
+        samtools faidx {input.reference} {wildcards.rn} | seqtk seq -l 60 > {output.rn}
+        samtools faidx {input.ancestor} {wildcards.an} | seqtk seq -l 60 > {output.an}
 
         mutyper ancestor \
             {input.vcf} \
