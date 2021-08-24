@@ -4,7 +4,7 @@ include: "snv.smk"
 VCF = "/net/eichler/vol27/projects/hprc/nobackups/data_table/preqc/chm13/vcf/variants_freeze1_snv_snv_alt.vcf.gz"
 REF = "/net/eichler/vol26/projects/chm13_t2t/nobackups/assemblies/chm13_v1.1_plus38Y.fasta"
 ANCESTRAL = "/net/eichler/vol28/projects/long_read_archive/nobackups/nhp/Clint_PTR/assemblies/hifiasm/0.15.2/Clint_PTR.hifiasm.bp.hap1.p_ctg.fasta"
-SAM = "net/eichler/vol26/projects/primate_sv/nobackups/nhp_sd_pav/temp/Clint_PTR/align/pre-cut/aligned_tig_h1.sam.gz"
+SAM = "/net/eichler/vol26/projects/primate_sv/nobackups/nhp_sd_pav/temp/Clint_PTR/align/pre-cut/aligned_tig_h1.sam.gz"
 PAIRS = "temp/mutypes.txt"
 
 if not os.path.exists(PAIRS):
@@ -66,8 +66,10 @@ rule make_ancestor:
 
 
 def get_mutyper_fastas(wc):
+    out = []
     for rn, an in pairs:
-        yield (rules.make_ancestor.output.fasta).format(rn=rn, an=an)
+        out.append((rules.make_ancestor.output.fasta).format(rn=rn, an=an))
+    return out
 
 
 rule mutyper_setup:
