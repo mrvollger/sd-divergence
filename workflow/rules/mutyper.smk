@@ -44,9 +44,9 @@ rule make_chain:
     input:
         psl=rules.make_psl.output.psl,
     output:
-        chain="temp/mutyper/psl/{rn}-{an}.chain",
+        chain=temp("temp/mutyper/chain/{rn}-{an}.chain"),
     log:
-        "logs/mutyper/chain.log",
+        "logs/mutyper/chain/{rn}-{an}.log",
     conda:
         "../envs/env.yml"
     shell:
