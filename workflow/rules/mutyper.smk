@@ -92,7 +92,7 @@ rule subset_vcf:
         "subset"
     shell:
         """
-        tabix \
+        tabix -h \
             {input.vcf} \
             $(head -n 1 {input.chain} \
                 | cut -d" " -f 3,6,7  \
