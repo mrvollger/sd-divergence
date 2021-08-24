@@ -66,10 +66,8 @@ rule make_ancestor:
 
 
 def get_mutyper_fastas(wc):
-    out = []
     for rn, an in pairs:
-        out.append((rules.make_ancestor.output.fasta).format(rn=rn, an=an))
-    return out
+        yeild((rules.make_ancestor.output.fasta).format(rn=rn, an=an))
 
 
 rule mutyper_setup:
