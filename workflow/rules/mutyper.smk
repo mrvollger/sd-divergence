@@ -99,6 +99,7 @@ rule subset_vcf:
                 | sed 's/ /\t/g' \
                 | awk '{{print $1":"$2"-"$3}}' \
             ) \
+        | bcftools +fill-tags \
         > {output}
         """
 
