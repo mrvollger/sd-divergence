@@ -76,6 +76,7 @@ rule subset_vcf:
     shell:
         """
         bedtools intersect \
+            -header \
             -a {input.vcf} \
             -b <(head -n 1 {input.chain} | cut -d" " -f 3,6,7  | sed 's/ /\t/g') \
         > {output}
