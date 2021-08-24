@@ -57,7 +57,7 @@ rule make_chain:
         grep -w {wildcards.rn} {input.psl} \
             | grep -w {wildcards.an} \
             | pslToChain /dev/stdin \
-            {output}  
+            {output} || touch {output} 
         """
 
 
