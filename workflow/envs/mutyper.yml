@@ -1,0 +1,9 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - libcurl
+  - bzip2
+pip:
+  - mutyper

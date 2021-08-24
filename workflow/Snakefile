@@ -48,6 +48,7 @@ include: "rules/snv.smk"
 include: "rules/distance.smk"
 include: "rules/tables.smk"
 include: "rules/plots.smk"
+include: "rules/mutyper.smk"
 
 
 rule all:
