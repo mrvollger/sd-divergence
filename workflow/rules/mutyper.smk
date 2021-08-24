@@ -162,7 +162,7 @@ rule annotated_vcf:
         vcf="results/mutyper/anno_vcf.vcf.gz",
         tbi="results/mutyper/anno_vcf.vcf.gz.tbi",
     log:
-        "logs/mutyper/annotate_vcf/{rn}-{an}.log",
+        "logs/mutyper/annotated_vcf.log",
     conda:
         "../envs/mutyper.yml"
     shell:
