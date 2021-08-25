@@ -97,9 +97,9 @@ rule subset_vcf:
              cat {output.rgn}
 
              bcftools view -h {input.vcf} $(cat {output.rgn}) \
-                 | bcftools sort - \
 
-        #         | bcftools +fill-tags - \
+        #        | bcftools sort - \
+        #          | bcftools +fill-tags - \
         #     > {output.vcf}
         """
 
