@@ -70,7 +70,9 @@ rule setup_vcf:
         "../envs/env.yml"
     shell:
         """
-        zcat {input.vcf} | bgzip > {output.vcf}
+        zcat {input.vcf} \
+            | bcftools sort - \
+            | bgzip > {output.vcf}
         tabix -f -p vcf {output.vcf}
         """
 
