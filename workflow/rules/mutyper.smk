@@ -97,6 +97,7 @@ rule subset_vcf:
         cat {output.rgn}
 
         tabix -h {input.vcf} $(cat {output.rgn}) \
+            | bcftools sort -c all \
             | bcftools +fill-tags \
         > {output.vcf}
         """
