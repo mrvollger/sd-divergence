@@ -120,6 +120,7 @@ rule subset_vcf:
 rule make_ancestor:
     input:
         bcf=rules.subset_vcf.output.bcf,
+        rgn=rules.subset_vcf.output.rgn,
         chain=rules.make_chain.output.chain,
         reference=REF,
         ancestor=ANCESTRAL,
@@ -142,6 +143,7 @@ rule make_ancestor:
         samtools faidx {output.an}
 
         mutyper ancestor \
+            --bed {input.rgn} \
             {input.bcf} \
             {output.rn} \
             {output.an} \
