@@ -44,7 +44,7 @@ rule make_chain:
     input:
         psl=rules.make_psl.output.psl,
     output:
-        chain1=temp("temp/mutyper/chain/{an}-to-{rn}.chain"),
+        chain1=temp("temp/mutyper/chain/temp/{an}-to-{rn}.chain"),
         chain=temp("temp/mutyper/chain/{rn}-to-{an}.chain"),
     log:
         "logs/mutyper/chain/{rn}-{an}.log",
