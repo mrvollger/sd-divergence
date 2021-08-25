@@ -88,18 +88,19 @@ rule subset_vcf:
         "../envs/env.yml"
     shell:
         """
-        grep "^chain" {input.chain} \
-            | grep -w {wildcards.rn} \
-            | grep -w {wildcards.an} \
-            | cut -d " " -f 8,11,12 \
-            | awk '{{print $1":"$2"-"$3 }}' \
-            > {output.rgn}
-        cat {output.rgn}
+             grep "^chain" {input.chain} \
+                 | grep -w {wildcards.rn} \
+                 | grep -w {wildcards.an} \
+                 | cut -d " " -f 8,11,12 \
+                 | awk '{{print $1":"$2"-"$3 }}' \
+                 > {output.rgn}
+             cat {output.rgn}
 
-        bcftools view -h {input.vcf} $(cat {output.rgn}) \
-            | bcftools sort - \
-            | bcftools +fill-tags - \
-        > {output.vcf}
+             bcftools view -h {input.vcf} $(cat {output.rgn}) \
+                 | bcftools sort - \
+
+        #         | bcftools +fill-tags - \
+        #     > {output.vcf}
         """
 
 
