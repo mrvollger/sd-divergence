@@ -44,7 +44,8 @@ rule make_chain:
     input:
         psl=rules.make_psl.output.psl,
     output:
-        chain=temp("temp/mutyper/chain/{rn}-{an}.chain"),
+        chain1=temp("temp/mutyper/chain/{an}-to-{rn}.chain"),
+        chain=temp("temp/mutyper/chain/{rn}-to-{an}.chain"),
     log:
         "logs/mutyper/chain/{rn}-{an}.log",
     conda:
@@ -55,7 +56,9 @@ rule make_chain:
         grep -w {wildcards.rn} {input.psl} \
             | grep -w {wildcards.an} \
             | pslToChain /dev/stdin \
-            {output}
+            {output.chain1}
+
+        chainSwap {output.chain1} {output.chain}
         """
 
 
@@ -110,7 +113,7 @@ rule make_ancestor:
     output:
         an=temp("temp/mutyper/ancestral_fasta/an_{rn}-{an}.fa"),
         rn=temp("temp/mutyper/ancestral_fasta/rn_{rn}-{an}.fa"),
-        fasta="temp/mutyper/ancestral_fasta/{rn}-{an}.fa",
+        fasta=temp("temp/mutyper/ancestral_fasta/{rn}-{an}.fa"),
     log:
         "logs/mutyper/ancestral_fasta/{rn}-{an}.log",
     conda:
@@ -134,8 +137,8 @@ rule annotate_vcf:
         vcf=rules.subset_vcf.output.vcf,
         fasta=rules.make_ancestor.output.fasta,
     output:
-        vcf="temp/mutyper/anno_vcf/{rn}-{an}.vcf.gz",
-        tbi="temp/mutyper/anno_vcf/{rn}-{an}.vcf.gz.tbi",
+        vcf=temp("temp/mutyper/anno_vcf/{rn}-{an}.vcf.gz"),
+        tbi=temp("temp/mutyper/anno_vcf/{rn}-{an}.vcf.gz.tbi"),
     log:
         "logs/mutyper/annotate_vcf/{rn}-{an}.log",
     conda:
