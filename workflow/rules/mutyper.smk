@@ -71,7 +71,7 @@ rule setup_vcf:
     shell:
         """
         bcftools sort \
-            -O b \
+            -O b -m 8G \
             {input.vcf} \
             > {output.bcf}
 
