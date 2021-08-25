@@ -71,7 +71,7 @@ rule setup_vcf:
     shell:
         """
         zcat {input.vcf} | bgzip > {output.vcf}
-        tabix -p vcf {output.vcf}
+        tabix -f -p vcf {output.vcf}
         """
 
 
@@ -152,7 +152,7 @@ rule annotate_vcf:
         """
         mutyper variants {input.fasta} {input.vcf} \
             | bgzip > {output.vcf}
-        tabix -p vcf {output.vcf}
+        tabix -f -p vcf {output.vcf}
         """
 
 
