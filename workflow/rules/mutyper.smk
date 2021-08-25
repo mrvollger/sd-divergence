@@ -141,8 +141,8 @@ rule annotate_vcf:
         vcf=rules.subset_vcf.output.vcf,
         fasta=rules.make_ancestor.output.fasta,
     output:
-        vcf=temp("temp/mutyper/anno_vcf/{rn}-{an}.vcf.gz"),
-        tbi=temp("temp/mutyper/anno_vcf/{rn}-{an}.vcf.gz.tbi"),
+        vcf=temp("temp/mutyper/anno_vcf/{rn}-{an}.vcf"),
+        #tbi=temp("temp/mutyper/anno_vcf/{rn}-{an}.vcf.gz.tbi"),
     log:
         "logs/mutyper/annotate_vcf/{rn}-{an}.log",
     conda:
@@ -150,8 +150,8 @@ rule annotate_vcf:
     shell:
         """
         mutyper variants {input.fasta} {input.vcf} \
-            | bgzip > {output.vcf}
-        tabix -f -p vcf {output.vcf}
+         > {output.vcf}
+        #tabix -f -p vcf {output.vcf}
         """
 
 
