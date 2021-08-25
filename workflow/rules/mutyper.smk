@@ -210,7 +210,7 @@ rule mutyper_spectra:
         """
 
 
-rule mutyper_setup:
+rule mutyper:
     input:
         rules.annotated_vcf.output,
         rules.mutyper_spectra.output,
