@@ -105,7 +105,6 @@ rule subset_vcf:
 rule make_ancestor:
     input:
         vcf=rules.subset_vcf.output.vcf,
-        sam=SAM,
         chain=rules.make_chain.output.chain,
         reference=REF,
         ancestor=ANCESTRAL,
