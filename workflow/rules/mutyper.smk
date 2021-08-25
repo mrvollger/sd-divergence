@@ -146,7 +146,7 @@ rule make_ancestor:
 
 rule annotate_vcf:
     input:
-        vcf=rules.subset_vcf.output.vcf,
+        bcf=rules.subset_vcf.output.bcf,
         fasta=rules.make_ancestor.output.fasta,
     output:
         vcf=temp("temp/mutyper/anno_vcf/{rn}-{an}.vcf"),
@@ -157,7 +157,7 @@ rule annotate_vcf:
         "../envs/mutyper.yml"
     shell:
         """
-        mutyper variants {input.fasta} {input.vcf} \
+        mutyper variants {input.fasta} {input.bcf} \
          > {output.vcf}
         #tabix -f -p vcf {output.vcf}
         """
