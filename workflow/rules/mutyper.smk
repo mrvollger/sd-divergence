@@ -82,7 +82,7 @@ rule subset_vcf:
     output:
         vcf=temp("temp/mutyper/vcf/{rn}.vcf"),
     log:
-        "logs/mutyper/vcf/{rn}-{an}.log",
+        "logs/mutyper/vcf/{rn}.log",
     conda:
         "../envs/env.yml"
     shell:
