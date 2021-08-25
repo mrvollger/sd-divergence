@@ -118,22 +118,25 @@ rule subset_vcf:
 rule prep_ancestor:
     input:
         reference=REF,
-        ancestor=ANCESTRAL,
+        outgroup=ANCESTRAL,
     output:
-        an=temp("temp/mutyper/ancestral_fasta/rn/an_{ref}-{out}.fa"),
-        fai_an=temp("temp/mutyper/ancestral_fasta/rn/an_{ref}-{out}.fa.fai"),
-        rn=temp("temp/mutyper/ancestral_fasta/an/rn_{ref}-{out}.fa"),
-        fai_rn=temp("temp/mutyper/ancestral_fasta/an/rn_{ref}-{out}.fa.fai"),
+        ref=temp("temp/mutyper/input_fasta/ref_{ref}-{out}.fa"),
+        fai_ref=temp("temp/mutyper/input_fasta/ref_{ref}-{out}.fa.fai"),
+        out=temp("temp/mutyper/input_fasta/out_{out}-{ref}.fa"),
+        fai_out=temp("temp/mutyper/input_fasta/out_{out}-{ref}.fa.fai"),
     log:
         "logs/mutyper/ancestral_fasta/{ref}-{out}.log",
     conda:
         "../envs/env.yml"
     shell:
         """
-        samtools faidx {input.reference} {wildcards.ref} | seqtk seq -l 60 > {output.rn}
-        samtools faidx {input.ancestor} {wildcards.out} | seqtk seq -l 60 > {output.an}
-        samtools faidx {output.rn}
-        samtools faidx {output.an}
+        samtools faidx {input.reference} {wildcards.ref} \
+            | seqtk seq -l 60 > {output.ref}
+        sleep 5s; samtools faidx {output.ref}
+
+        samtools faidx {input.outgroup} {wildcards.out} 
+            | seqtk seq -l 60 > {output.out}
+        sleep 5s; samtools faidx {output.out}
         """
 
 
@@ -142,8 +145,8 @@ rule make_ancestor:
         bcf=rules.subset_vcf.output.bcf,
         rgn=rules.subset_vcf.output.rgn,
         chain=rules.make_chain.output.chain,
-        an=rules.prep_ancestor.output.an,
-        rn=rules.prep_ancestor.output.rn,
+        ref=rules.prep_ancestor.output.ref,
+        out=rules.prep_ancestor.output.out,
     output:
         fasta=temp("temp/mutyper/ancestral_fasta/ref-to-out/{ref}-{out}.fa"),
         fai=temp("temp/mutyper/ancestral_fasta/ref-to-out/{ref}-{out}.fa.fai"),
@@ -156,8 +159,8 @@ rule make_ancestor:
         mutyper ancestor \
             --bed {input.rgn} \
             {input.bcf} \
-            {input.rn} \
-            {input.an} \
+            {input.ref} \
+            {input.out} \
             {input.chain} \
         {output.fasta}
         samtools faidx {output.fasta}
@@ -192,8 +195,8 @@ rule make_ancestor_out_to_ref:
         bcf=rules.subset_vcf.output.bcf,
         rgn=rules.subset_vcf.output.rgn,
         chain=rules.make_chain.output.chain_out_to_ref,
-        an=rules.prep_ancestor.output.an,
-        rn=rules.prep_ancestor.output.rn,
+        ref=rules.prep_ancestor.output.ref,
+        out=rules.prep_ancestor.output.out,
     output:
         fasta=temp("temp/mutyper/ancestral_fasta/out-to-ref/{out}-{ref}.fa"),
         fai=temp("temp/mutyper/ancestral_fasta/out-to-ref/{out}-{ref}.fa.fai"),
@@ -206,8 +209,8 @@ rule make_ancestor_out_to_ref:
         mutyper ancestor \
             --bed {input.rgn} \
             {input.bcf} \
-            {input.rn} \
-            {input.an} \
+            {input.ref} \
+            {input.out} \
             {input.chain} \
         {output.fasta}
         samtools faidx {output.fasta}
