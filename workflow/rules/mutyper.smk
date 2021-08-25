@@ -93,6 +93,8 @@ rule subset_vcf:
                  | grep -w {wildcards.an} \
                  | cut -d " " -f 8,11,12 \
                  | awk '{{print $1"\t"$2"\t"$3 }}' \
+                 | bedtools sort -i - \
+                 | bedtools merge -i - \
                  > {output.rgn}
              cat {output.rgn}
 
