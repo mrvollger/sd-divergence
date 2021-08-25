@@ -60,6 +60,7 @@ rule make_chain:
             | pslToChain /dev/stdin {output.chain_out_to_ref}
 
         chainSwap {output.chain_out_to_ref} /dev/stdout \
+            | chainSort /dev/stdin /dev/stdout \
             | sed '/^$/d' \
             > {output.chain}
         """
