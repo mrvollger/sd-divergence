@@ -155,8 +155,8 @@ rule annotate_vcf:
         bcf=rules.subset_vcf.output.bcf,
         fasta=rules.make_ancestor.output.fasta,
     output:
-        vcf=temp("temp/mutyper/anno_vcf/{rn}-{an}.vcf"),
-        #tbi=temp("temp/mutyper/anno_vcf/{rn}-{an}.vcf.gz.tbi"),
+        bcf=temp("temp/mutyper/anno_vcf/{rn}-{an}.bcf"),
+        csi=temp("temp/mutyper/anno_vcf/{rn}-{an}.bcf.csi"),
     log:
         "logs/mutyper/annotate_vcf/{rn}-{an}.log",
     conda:
@@ -164,8 +164,9 @@ rule annotate_vcf:
     shell:
         """
         mutyper variants {input.fasta} {input.bcf} \
-         > {output.vcf}
-        #tabix -f -p vcf {output.vcf}
+            | bcftools sort -Ob -m 8G - \
+            > {output.bcf}
+        bcftools index -f {output.bcf}
         """
 
 
@@ -173,25 +174,24 @@ def get_mutyper_rtn(wc):
     for an, rn in pairs:
         if rn == "*" or an == "*" or an == "h1tg000047l":
             continue
-        yield (rules.annotate_vcf.output.vcf).format(rn=rn, an=an)
+        yield (rules.annotate_vcf.output.bcf).format(rn=rn, an=an)
 
 
 rule annotated_vcf:
     input:
-        vcf=get_mutyper_rtn,
+        bcf=get_mutyper_rtn,
     output:
-        vcf="results/mutyper/anno_vcf.vcf.gz",
-        tbi="results/mutyper/anno_vcf.vcf.gz.tbi",
+        bcf="results/mutyper/anno_vcf.bcf",
+        csi="results/mutyper/anno_vcf.bcf.csi",
     log:
         "logs/mutyper/annotated_vcf.log",
     conda:
         "../envs/env.yml"
     shell:
         """
-        bcftools concat -a \
-            {input.vcf} \
-            | bgzip > {output.vcf}
-        tabix -p vcf {output.vcf}
+        bcftools concat -Ob -a \
+            {input.bcf} > {output.bcf}
+        bcftools index -f {output.bcf}
         """
 
 
