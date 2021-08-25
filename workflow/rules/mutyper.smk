@@ -91,7 +91,7 @@ rule subset_vcf:
         grep "^chain" {input.chain} \
             | grep -w {wildcards.rn} \
             | grep -w {wildcards.an} \
-            | cut -f " " -f 8,11,12 \
+            | cut -d " " -f 8,11,12 \
             | awk '{{print $1":"$2"-"$3 }}' \
             > {output.rgn}
 
