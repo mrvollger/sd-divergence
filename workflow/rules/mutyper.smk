@@ -94,12 +94,13 @@ rule subset_vcf:
             | cut -d " " -f 8,11,12 \
             | awk '{{print $1":"$2"-"$3 }}' \
             > {output.rgn}
+        cat {output.rgn}
 
         tabix -h \
                 {input.vcf} \
                 -R {output.rgn} \
             | bcftools +fill-tags \
-        > {output}
+        > {output.vcf}
         """
 
 
