@@ -54,7 +54,7 @@ rule make_chain:
         """
         module load ucsc
         pslToChain {input.psl} {output.chain_out_to_ref}
-        chainSwap {output.chain1} {output.chain}
+        chainSwap {output.chain_out_to_ref} {output.chain}
         """
 
 
