@@ -59,7 +59,9 @@ rule make_chain:
             | grep -w {wildcards.an} \
             | pslToChain /dev/stdin {output.chain_out_to_ref}
 
-        cp {output.chain_out_to_ref} {output.chain}
+        chainSwap {output.chain_out_to_ref} /dev/stdout \
+            | sed '/^$/d' \
+            > {output.chain}
         """
 
 
@@ -87,7 +89,7 @@ rule setup_vcf:
 rule subset_vcf:
     input:
         bcf=rules.setup_vcf.output.bcf,
-        chain=rules.make_chain.output.chain,
+        chain=rules.make_chain.output.chain_out_to_ref,
     output:
         rgn=temp("temp/mutyper/rgn/{rn}-{an}.rgn"),
         bcf=temp("temp/mutyper/vcf/{rn}-{an}.bcf"),
@@ -113,7 +115,6 @@ rule subset_vcf:
             | bcftools +fill-tags \
             -Ob -o {output.bcf}
         """
-        #| cut -d " " -f 8,11,12 \
 
 
 rule make_ancestor:
