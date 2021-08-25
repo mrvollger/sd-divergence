@@ -104,10 +104,9 @@ rule subset_vcf:
 
              bcftools view {input.bcf} \
                  --regions-file {output.rgn} \
+                | bcftools sort -m 8G - \
+                | bcftools +fill-tags - \
 
-        # $(cat {output.rgn}) \
-        #        | bcftools sort - \
-        #          | bcftools +fill-tags - \
         #     > {output.vcf}
         """
 
