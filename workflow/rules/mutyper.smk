@@ -62,24 +62,26 @@ rule setup_vcf:
     input:
         vcf=VCF,
     output:
-        vcf=temp("temp/mutyper/all.vcf.gz"),
-        tbi=temp("temp/mutyper/all.vcf.gz.tbi"),
+        bcf=temp("temp/mutyper/all.bcf"),
+        csi=temp("temp/mutyper/all.bcf.csi"),
     log:
         "logs/mutyper/vcf.log",
     conda:
         "../envs/env.yml"
     shell:
         """
-        zcat {input.vcf} \
-            | bcftools sort - \
-            | bgzip > {output.vcf}
-        tabix -f -p vcf {output.vcf}
+        bcftools sort \
+            -O b \
+            {input.vcf} \
+            > {output.bcf}
+
+        bcftools index -f {output.bcf}
         """
 
 
 rule subset_vcf:
     input:
-        vcf=rules.setup_vcf.output.vcf,
+        bcf=rules.setup_vcf.output.bcf,
         chain=rules.make_chain.output.chain,
     output:
         rgn=temp("temp/mutyper/rgn/{rn}-{an}.rgn"),
@@ -100,7 +102,7 @@ rule subset_vcf:
                  > {output.rgn}
              cat {output.rgn}
 
-             bcftools view -h {input.vcf} \
+             bcftools view -h {input.bcf} \
                  --regions-file {output.rgn} \
 
         # $(cat {output.rgn}) \
