@@ -96,9 +96,7 @@ rule subset_vcf:
             > {output.rgn}
         cat {output.rgn}
 
-        tabix -h \
-                {input.vcf} \
-                -R {output.rgn} \
+        tabix -h {input.vcf} $(cat {output.rgn}) \
             | bcftools +fill-tags \
         > {output.vcf}
         """
