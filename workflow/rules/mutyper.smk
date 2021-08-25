@@ -85,7 +85,7 @@ rule subset_vcf:
         chain=rules.make_chain.output.chain,
     output:
         rgn=temp("temp/mutyper/rgn/{rn}-{an}.rgn"),
-        vcf=temp("temp/mutyper/vcf/{rn}-{an}.vcf"),
+        bcf=temp("temp/mutyper/vcf/{rn}-{an}.bcf"),
     log:
         "logs/mutyper/vcf/{rn}-{an}.log",
     conda:
@@ -106,13 +106,13 @@ rule subset_vcf:
              --regions-file {output.rgn} \
             | bcftools sort -m 8G - \
             | bcftools +fill-tags \
-        > {output.vcf}
+            -Ob -o {output.bcf}
         """
 
 
 rule make_ancestor:
     input:
-        vcf=rules.subset_vcf.output.vcf,
+        bcf=rules.subset_vcf.output.bcf,
         chain=rules.make_chain.output.chain,
         reference=REF,
         ancestor=ANCESTRAL,
@@ -135,7 +135,7 @@ rule make_ancestor:
         samtools faidx {output.an}
 
         mutyper ancestor \
-            {input.vcf} \
+            {input.bcf} \
             {output.rn} \
             {output.an} \
             {input.chain} \
