@@ -134,7 +134,7 @@ rule prep_ancestor:
             | seqtk seq -l 60 > {output.ref}
         sleep 5s; samtools faidx {output.ref}
 
-        samtools faidx {input.outgroup} {wildcards.out} 
+        samtools faidx {input.outgroup} {wildcards.out} \
             | seqtk seq -l 60 > {output.out}
         sleep 5s; samtools faidx {output.out}
         """
