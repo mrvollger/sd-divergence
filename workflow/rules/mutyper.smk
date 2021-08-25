@@ -156,8 +156,8 @@ rule make_ancestor:
         mutyper ancestor \
             --bed {input.rgn} \
             {input.bcf} \
-            {output.rn} \
-            {output.an} \
+            {input.rn} \
+            {input.an} \
             {input.chain} \
         {output.fasta}
         samtools faidx {output.fasta}
@@ -206,8 +206,8 @@ rule make_ancestor_out_to_ref:
         mutyper ancestor \
             --bed {input.rgn} \
             {input.bcf} \
-            {output.rn} \
-            {output.an} \
+            {input.rn} \
+            {input.an} \
             {input.chain} \
         {output.fasta}
         samtools faidx {output.fasta}
