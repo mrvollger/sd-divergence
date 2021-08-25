@@ -57,7 +57,7 @@ rule make_chain:
         module load ucsc
         grep -w {wildcards.rn} {input.psl} \
             | grep -w {wildcards.an} \
-            pslToChain /dev/stdin {output.chain_out_to_ref}
+            | pslToChain /dev/stdin {output.chain_out_to_ref}
 
         chainSwap {output.chain_out_to_ref} {output.chain}
         """
