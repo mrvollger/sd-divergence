@@ -108,7 +108,6 @@ rule subset_vcf:
              | bedtools sort -i - \
              | bedtools merge -i - \
              > {output.rgn}
-         cat {output.rgn}
 
         bcftools view {input.bcf} \
              --regions-file {output.rgn} \
