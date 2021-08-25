@@ -80,16 +80,24 @@ rule subset_vcf:
         vcf=rules.setup_vcf.output.vcf,
         chain=rules.make_chain.output.chain,
     output:
-        vcf=temp("temp/mutyper/vcf/{rn}.vcf"),
+        rgn=temp("temp/mutyper/rgn/{rn}-{an}.rgn"),
+        vcf=temp("temp/mutyper/vcf/{rn}-{an}.vcf"),
     log:
-        "logs/mutyper/vcf/{rn}.log",
+        "logs/mutyper/vcf/{rn}-{an}.log",
     conda:
         "../envs/env.yml"
     shell:
         """
+        grep "^chain" {input.chain} \
+            | grep -w {wildcards.rn} \
+            | grep -w {wildcards.an} \
+            | cut -f " " -f 8,11,12 \
+            | awk '{{print $1":"$2"-"$3 }}' \
+            > {output.rgn}
+
         tabix -h \
                 {input.vcf} \
-                {wildcards.rn} \
+                -R {output.rgn} \
             | bcftools +fill-tags \
         > {output}
         """
