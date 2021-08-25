@@ -197,7 +197,7 @@ rule annotated_vcf:
 
 rule mutyper_spectra:
     input:
-        vcf=rules.annotated_vcf.output.vcf,
+        bcf=rules.annotated_vcf.output.bcf,
     output:
         spectra="results/mutyper/spectra.txt",
     log:
@@ -206,7 +206,7 @@ rule mutyper_spectra:
         "../envs/mutyper.yml"
     shell:
         """
-        mutyper spectra {input.vcf} > {output.spectra}
+        mutyper spectra {input.bcf} > {output.spectra}
         """
 
 
