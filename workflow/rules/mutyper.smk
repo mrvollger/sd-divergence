@@ -110,9 +110,12 @@ rule make_ancestor:
         reference=REF,
         ancestor=ANCESTRAL,
     output:
-        an=temp("temp/mutyper/ancestral_fasta/an_{rn}-{an}.fa"),
-        rn=temp("temp/mutyper/ancestral_fasta/rn_{rn}-{an}.fa"),
+        an=temp("temp/mutyper/ancestral_fasta/rn/an_{rn}-{an}.fa"),
+        fai_an=temp("temp/mutyper/ancestral_fasta/rn/an_{rn}-{an}.fa.fai"),
+        rn=temp("temp/mutyper/ancestral_fasta/an/rn_{rn}-{an}.fa"),
+        fai_rn=temp("temp/mutyper/ancestral_fasta/an/rn_{rn}-{an}.fa.fai"),
         fasta=temp("temp/mutyper/ancestral_fasta/{rn}-{an}.fa"),
+        fai=temp("temp/mutyper/ancestral_fasta/{rn}-{an}.fa.fai"),
     log:
         "logs/mutyper/ancestral_fasta/{rn}-{an}.log",
     conda:
@@ -121,6 +124,8 @@ rule make_ancestor:
         """
         samtools faidx {input.reference} {wildcards.rn} | seqtk seq -l 60 > {output.rn}
         samtools faidx {input.ancestor} {wildcards.an} | seqtk seq -l 60 > {output.an}
+        samtools faidx {output.rn}
+        samtools faidx {output.an}
 
         mutyper ancestor \
             {input.vcf} \
@@ -128,6 +133,7 @@ rule make_ancestor:
             {output.an} \
             {input.chain} \
          {output.fasta}
+         samtools faidx {output.fasta}
         """
 
 
