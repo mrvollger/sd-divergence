@@ -102,7 +102,7 @@ rule subset_vcf:
                  > {output.rgn}
              cat {output.rgn}
 
-             bcftools view -h {input.bcf} \
+             bcftools view {input.bcf} \
                  --regions-file {output.rgn} \
 
         # $(cat {output.rgn}) \
