@@ -44,20 +44,16 @@ rule make_chain:
     input:
         psl=rules.make_psl.output.psl,
     output:
-        chain1=temp("temp/mutyper/chain/temp/{an}-to-{rn}.chain"),
-        chain=temp("temp/mutyper/chain/{rn}-to-{an}.chain"),
+        chain_out_to_ref=temp("temp/mutyper/chain/temp/outgroup-to-reference.chain"),
+        chain=temp("temp/mutyper/chain/reference-to-outgroup.chain"),
     log:
-        "logs/mutyper/chain/{rn}-{an}.log",
+        "logs/mutyper/chain/chain.log",
     conda:
         "../envs/env.yml"
     shell:
         """
         module load ucsc
-        grep -w {wildcards.rn} {input.psl} \
-            | grep -w {wildcards.an} \
-            | pslToChain /dev/stdin \
-            {output.chain1}
-
+        pslToChain {input.psl} {output.chain_out_to_ref}
         chainSwap {output.chain1} {output.chain}
         """
 
@@ -84,7 +80,7 @@ rule subset_vcf:
         vcf=rules.setup_vcf.output.vcf,
         chain=rules.make_chain.output.chain,
     output:
-        vcf=temp("temp/mutyper/vcf/{rn}-{an}.vcf"),
+        vcf=temp("temp/mutyper/vcf/{rn}.vcf"),
     log:
         "logs/mutyper/vcf/{rn}-{an}.log",
     conda:
@@ -92,13 +88,9 @@ rule subset_vcf:
     shell:
         """
         tabix -h \
-            {input.vcf} \
-            $(head -n 1 {input.chain} \
-                | cut -d" " -f 8,11,12  \
-                | sed 's/ /\t/g' \
-                | awk '{{print $1":"$2"-"$3}}' \
-            ) \
-        | bcftools +fill-tags \
+                {input.vcf} \
+                {wildcards.rn} \
+            | bcftools +fill-tags \
         > {output}
         """
 
@@ -127,7 +119,7 @@ rule make_ancestor:
             {input.vcf} \
             {output.rn} \
             {output.an} \
-             {input.chain} \
+            {input.chain} \
          {output.fasta}
         """
 
