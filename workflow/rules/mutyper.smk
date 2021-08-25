@@ -59,7 +59,7 @@ rule make_chain:
             | grep -w {wildcards.an} \
             | pslToChain /dev/stdin {output.chain_out_to_ref}
 
-        chainSwap {output.chain_out_to_ref} {output.chain}
+        cp {output.chain_out_to_ref} {output.chain}
         """
 
 
@@ -100,7 +100,7 @@ rule subset_vcf:
         grep "^chain" {input.chain} \
              | grep -w {wildcards.rn} \
              | grep -w {wildcards.an} \
-             | cut -d " " -f 8,11,12 \
+             | cut -d " " -f 3,6,7 \
              | awk '{{print $1"\t"$2"\t"$3 }}' \
              | bedtools sort -i - \
              | bedtools merge -i - \
@@ -113,9 +113,7 @@ rule subset_vcf:
             | bcftools +fill-tags \
             -Ob -o {output.bcf}
         """
-
-
-# | cut -d " " -f 3,6,7 \
+        #| cut -d " " -f 8,11,12 \
 
 
 rule make_ancestor:
