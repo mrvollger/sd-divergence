@@ -44,10 +44,8 @@ rule make_chain:
     input:
         psl=rules.make_psl.output.psl,
     output:
-        chain_out_to_ref=temp(
-            "temp/mutyper/chain/temp/outgroup-to-reference_{rn}-{an}.chain"
-        ),
-        chain=temp("temp/mutyper/chain/reference-to-outgroup_{rn}-{an}.chain"),
+        chain_out_to_ref=temp("temp/mutyper/chain/out-to-ref/{rn}-{an}.chain"),
+        chain=temp("temp/mutyper/chain/ref-to-out/{rn}-{an}.chain"),
     log:
         "logs/mutyper/chain/chain_{rn}-{an}.log",
     conda:
@@ -92,8 +90,8 @@ rule subset_vcf:
         bcf=rules.setup_vcf.output.bcf,
         chain=rules.make_chain.output.chain_out_to_ref,
     output:
-        rgn=temp("temp/mutyper/rgn/{rn}-{an}.rgn"),
-        bcf=temp("temp/mutyper/vcf/{rn}-{an}.bcf"),
+        rgn=temp("temp/mutyper/subset/rgn/{rn}-{an}.rgn"),
+        bcf=temp("temp/mutyper/subset/vcf/{rn}-{an}.bcf"),
     log:
         "logs/mutyper/vcf/{rn}-{an}.log",
     conda:
@@ -117,11 +115,8 @@ rule subset_vcf:
         """
 
 
-rule make_ancestor:
+rule prep_ancestor:
     input:
-        bcf=rules.subset_vcf.output.bcf,
-        rgn=rules.subset_vcf.output.rgn,
-        chain=rules.make_chain.output.chain,
         reference=REF,
         ancestor=ANCESTRAL,
     output:
@@ -129,27 +124,43 @@ rule make_ancestor:
         fai_an=temp("temp/mutyper/ancestral_fasta/rn/an_{rn}-{an}.fa.fai"),
         rn=temp("temp/mutyper/ancestral_fasta/an/rn_{rn}-{an}.fa"),
         fai_rn=temp("temp/mutyper/ancestral_fasta/an/rn_{rn}-{an}.fa.fai"),
-        fasta=temp("temp/mutyper/ancestral_fasta/{rn}-{an}.fa"),
-        fai=temp("temp/mutyper/ancestral_fasta/{rn}-{an}.fa.fai"),
     log:
         "logs/mutyper/ancestral_fasta/{rn}-{an}.log",
     conda:
-        "../envs/mutyper.yml"
+        "../envs/env.yml"
     shell:
         """
         samtools faidx {input.reference} {wildcards.rn} | seqtk seq -l 60 > {output.rn}
         samtools faidx {input.ancestor} {wildcards.an} | seqtk seq -l 60 > {output.an}
         samtools faidx {output.rn}
         samtools faidx {output.an}
+        """
 
+
+rule make_ancestor:
+    input:
+        bcf=rules.subset_vcf.output.bcf,
+        rgn=rules.subset_vcf.output.rgn,
+        chain=rules.make_chain.output.chain,
+        an=rules.prep_ancestor.output.an,
+        rn=rules.prep_ancestor.output.rn,
+    output:
+        fasta=temp("temp/mutyper/ancestral_fasta/ref-to-out/{rn}-{an}.fa"),
+        fai=temp("temp/mutyper/ancestral_fasta/ref-to-out/{rn}-{an}.fa.fai"),
+    log:
+        "logs/mutyper/ancestral_fasta/ref-to-out/{rn}-{an}.log",
+    conda:
+        "../envs/mutyper.yml"
+    shell:
+        """
         mutyper ancestor \
             --bed {input.rgn} \
             {input.bcf} \
             {output.rn} \
             {output.an} \
             {input.chain} \
-         {output.fasta}
-         samtools faidx {output.fasta}
+        {output.fasta}
+        samtools faidx {output.fasta}
         """
 
 
@@ -158,10 +169,10 @@ rule annotate_vcf:
         bcf=rules.subset_vcf.output.bcf,
         fasta=rules.make_ancestor.output.fasta,
     output:
-        bcf=temp("temp/mutyper/anno_vcf/{rn}-{an}.bcf"),
-        csi=temp("temp/mutyper/anno_vcf/{rn}-{an}.bcf.csi"),
+        bcf=temp("temp/mutyper/vcf/ref-to-out/{rn}-{an}.bcf"),
+        csi=temp("temp/mutyper/vcf/ref-to-out/{rn}-{an}.bcf.csi"),
     log:
-        "logs/mutyper/annotate_vcf/{rn}-{an}.log",
+        "logs/mutyper/annotate_vcf/ref-to-out/{rn}-{an}.log",
     conda:
         "../envs/mutyper.yml"
     shell:
@@ -171,6 +182,61 @@ rule annotate_vcf:
             > {output.bcf}
         bcftools index -f {output.bcf}
         """
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+rule make_ancestor_out_to_ref:
+    input:
+        bcf=rules.subset_vcf.output.bcf,
+        rgn=rules.subset_vcf.output.rgn,
+        chain=rules.make_chain.output.chain_out_to_ref,
+        an=rules.prep_ancestor.output.an,
+        rn=rules.prep_ancestor.output.rn,
+    output:
+        fasta=temp("temp/mutyper/ancestral_fasta/out-to-ref/{rn}-{an}.fa"),
+        fai=temp("temp/mutyper/ancestral_fasta/out-to-ref/{rn}-{an}.fa.fai"),
+    log:
+        "logs/mutyper/ancestral_fasta/out-to-ref/{rn}-{an}.log",
+    conda:
+        "../envs/mutyper.yml"
+    shell:
+        """
+        mutyper ancestor \
+            --bed {input.rgn} \
+            {input.bcf} \
+            {output.rn} \
+            {output.an} \
+            {input.chain} \
+        {output.fasta}
+        samtools faidx {output.fasta}
+        """
+
+
+rule annotate_vcf_out_to_ref:
+    input:
+        bcf=rules.subset_vcf.output.bcf,
+        fasta=rules.make_ancestor_out_to_ref.output.fasta,
+    output:
+        bcf=temp("temp/mutyper/vcf/out-to-ref/{rn}-{an}.bcf"),
+        csi=temp("temp/mutyper/vcf/out-to-ref/{rn}-{an}.bcf.csi"),
+    log:
+        "logs/mutyper/annotate_vcf/out-to-ref/{rn}-{an}.log",
+    conda:
+        "../envs/mutyper.yml"
+    shell:
+        """
+        mutyper variants {input.fasta} {input.bcf} \
+            | bcftools sort -Ob -m 8G - \
+            > {output.bcf}
+        bcftools index -f {output.bcf}
+        """
+
+
+###############################################################################
+###############################################################################
+###############################################################################
 
 
 def get_mutyper_rtn(wc):
