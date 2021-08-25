@@ -94,7 +94,7 @@ rule subset_vcf:
         tabix -h \
             {input.vcf} \
             $(head -n 1 {input.chain} \
-                | cut -d" " -f 3,6,7  \
+                | cut -d" " -f 8,11,12  \
                 | sed 's/ /\t/g' \
                 | awk '{{print $1":"$2"-"$3}}' \
             ) \
