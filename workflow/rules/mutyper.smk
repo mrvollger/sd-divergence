@@ -54,7 +54,7 @@ rule make_chain:
         """
         module load ucsc
         pslToChain {input.psl} {output.chain_out_to_ref}
-        chainSwap {output.chain_out_to_ref} {output.chain}
+        cp {output.chain_out_to_ref} {output.chain}
         """
 
 
@@ -92,10 +92,11 @@ rule subset_vcf:
         "../envs/env.yml"
     shell:
         """
-         grep "^chain" {input.chain} \
+        #| cut -d " " -f 8,11,12 
+        grep "^chain" {input.chain} \
              | grep -w {wildcards.rn} \
              | grep -w {wildcards.an} \
-             | cut -d " " -f 8,11,12 \
+             | cut -d " " -f 3,6,7 \
              | awk '{{print $1"\t"$2"\t"$3 }}' \
              | bedtools sort -i - \
              | bedtools merge -i - \
