@@ -44,17 +44,22 @@ rule make_chain:
     input:
         psl=rules.make_psl.output.psl,
     output:
-        chain_out_to_ref=temp("temp/mutyper/chain/temp/outgroup-to-reference.chain"),
-        chain=temp("temp/mutyper/chain/reference-to-outgroup.chain"),
+        chain_out_to_ref=temp(
+            "temp/mutyper/chain/temp/outgroup-to-reference_{rn}-{an}.chain"
+        ),
+        chain=temp("temp/mutyper/chain/reference-to-outgroup_{rn}-{an}.chain"),
     log:
-        "logs/mutyper/chain/chain.log",
+        "logs/mutyper/chain/chain_{rn}-{an}.log",
     conda:
         "../envs/env.yml"
     shell:
         """
         module load ucsc
-        pslToChain {input.psl} {output.chain_out_to_ref}
-        cp {output.chain_out_to_ref} {output.chain}
+        grep -w {wildcards.rn} {input.psl} \
+            | grep -w {wildcards.an} \
+            pslToChain /dev/stdin {output.chain_out_to_ref}
+
+        chainSwap {output.chain_out_to_ref} {output.chain}
         """
 
 
@@ -92,11 +97,10 @@ rule subset_vcf:
         "../envs/env.yml"
     shell:
         """
-        #| cut -d " " -f 8,11,12 
         grep "^chain" {input.chain} \
              | grep -w {wildcards.rn} \
              | grep -w {wildcards.an} \
-             | cut -d " " -f 3,6,7 \
+             | cut -d " " -f 8,11,12 \
              | awk '{{print $1"\t"$2"\t"$3 }}' \
              | bedtools sort -i - \
              | bedtools merge -i - \
@@ -109,6 +113,9 @@ rule subset_vcf:
             | bcftools +fill-tags \
             -Ob -o {output.bcf}
         """
+
+
+# | cut -d " " -f 3,6,7 \
 
 
 rule make_ancestor:
