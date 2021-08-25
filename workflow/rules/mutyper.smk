@@ -44,10 +44,10 @@ rule make_chain:
     input:
         psl=rules.make_psl.output.psl,
     output:
-        chain_out_to_ref=temp("temp/mutyper/chain/out-to-ref/{rn}-{an}.chain"),
-        chain=temp("temp/mutyper/chain/ref-to-out/{rn}-{an}.chain"),
+        chain_out_to_ref=temp("temp/mutyper/chain/out-to-ref/{out}-{ref}.chain"),
+        chain=temp("temp/mutyper/chain/ref-to-out/{ref}-{out}.chain"),
     log:
-        "logs/mutyper/chain/chain_{rn}-{an}.log",
+        "logs/mutyper/chain/chain_{ref}-{out}.log",
     conda:
         "../envs/env.yml"
     shell:
@@ -90,10 +90,10 @@ rule subset_vcf:
         bcf=rules.setup_vcf.output.bcf,
         chain=rules.make_chain.output.chain_out_to_ref,
     output:
-        rgn=temp("temp/mutyper/subset/rgn/{rn}-{an}.rgn"),
-        bcf=temp("temp/mutyper/subset/vcf/{rn}-{an}.bcf"),
+        rgn=temp("temp/mutyper/subset/rgn/{ref}-{out}.rgn"),
+        bcf=temp("temp/mutyper/subset/vcf/{ref}-{out}.bcf"),
     log:
-        "logs/mutyper/vcf/{rn}-{an}.log",
+        "logs/mutyper/vcf/{ref}-{out}.log",
     conda:
         "../envs/env.yml"
     shell:
@@ -120,12 +120,12 @@ rule prep_ancestor:
         reference=REF,
         ancestor=ANCESTRAL,
     output:
-        an=temp("temp/mutyper/ancestral_fasta/rn/an_{rn}-{an}.fa"),
-        fai_an=temp("temp/mutyper/ancestral_fasta/rn/an_{rn}-{an}.fa.fai"),
-        rn=temp("temp/mutyper/ancestral_fasta/an/rn_{rn}-{an}.fa"),
-        fai_rn=temp("temp/mutyper/ancestral_fasta/an/rn_{rn}-{an}.fa.fai"),
+        an=temp("temp/mutyper/ancestral_fasta/rn/an_{ref}-{out}.fa"),
+        fai_an=temp("temp/mutyper/ancestral_fasta/rn/an_{ref}-{out}.fa.fai"),
+        rn=temp("temp/mutyper/ancestral_fasta/an/rn_{ref}-{out}.fa"),
+        fai_rn=temp("temp/mutyper/ancestral_fasta/an/rn_{ref}-{out}.fa.fai"),
     log:
-        "logs/mutyper/ancestral_fasta/{rn}-{an}.log",
+        "logs/mutyper/ancestral_fasta/{ref}-{out}.log",
     conda:
         "../envs/env.yml"
     shell:
@@ -145,10 +145,10 @@ rule make_ancestor:
         an=rules.prep_ancestor.output.an,
         rn=rules.prep_ancestor.output.rn,
     output:
-        fasta=temp("temp/mutyper/ancestral_fasta/ref-to-out/{rn}-{an}.fa"),
-        fai=temp("temp/mutyper/ancestral_fasta/ref-to-out/{rn}-{an}.fa.fai"),
+        fasta=temp("temp/mutyper/ancestral_fasta/ref-to-out/{ref}-{out}.fa"),
+        fai=temp("temp/mutyper/ancestral_fasta/ref-to-out/{ref}-{out}.fa.fai"),
     log:
-        "logs/mutyper/ancestral_fasta/ref-to-out/{rn}-{an}.log",
+        "logs/mutyper/ancestral_fasta/ref-to-out/{ref}-{out}.log",
     conda:
         "../envs/mutyper.yml"
     shell:
@@ -169,10 +169,10 @@ rule annotate_vcf:
         bcf=rules.subset_vcf.output.bcf,
         fasta=rules.make_ancestor.output.fasta,
     output:
-        bcf=temp("temp/mutyper/vcf/ref-to-out/{rn}-{an}.bcf"),
-        csi=temp("temp/mutyper/vcf/ref-to-out/{rn}-{an}.bcf.csi"),
+        bcf=temp("temp/mutyper/vcf/ref-to-out/{ref}-{out}.bcf"),
+        csi=temp("temp/mutyper/vcf/ref-to-out/{ref}-{out}.bcf.csi"),
     log:
-        "logs/mutyper/annotate_vcf/ref-to-out/{rn}-{an}.log",
+        "logs/mutyper/annotate_vcf/ref-to-out/{ref}-{out}.log",
     conda:
         "../envs/mutyper.yml"
     shell:
@@ -195,10 +195,10 @@ rule make_ancestor_out_to_ref:
         an=rules.prep_ancestor.output.an,
         rn=rules.prep_ancestor.output.rn,
     output:
-        fasta=temp("temp/mutyper/ancestral_fasta/out-to-ref/{rn}-{an}.fa"),
-        fai=temp("temp/mutyper/ancestral_fasta/out-to-ref/{rn}-{an}.fa.fai"),
+        fasta=temp("temp/mutyper/ancestral_fasta/out-to-ref/{out}-{ref}.fa"),
+        fai=temp("temp/mutyper/ancestral_fasta/out-to-ref/{out}-{ref}.fa.fai"),
     log:
-        "logs/mutyper/ancestral_fasta/out-to-ref/{rn}-{an}.log",
+        "logs/mutyper/ancestral_fasta/out-to-ref/{ref}-{out}.log",
     conda:
         "../envs/mutyper.yml"
     shell:
@@ -219,10 +219,10 @@ rule annotate_vcf_out_to_ref:
         bcf=rules.subset_vcf.output.bcf,
         fasta=rules.make_ancestor_out_to_ref.output.fasta,
     output:
-        bcf=temp("temp/mutyper/vcf/out-to-ref/{rn}-{an}.bcf"),
-        csi=temp("temp/mutyper/vcf/out-to-ref/{rn}-{an}.bcf.csi"),
+        bcf=temp("temp/mutyper/vcf/out-to-ref/{out}-{ref}.bcf"),
+        csi=temp("temp/mutyper/vcf/out-to-ref/{out}-{ref}.bcf.csi"),
     log:
-        "logs/mutyper/annotate_vcf/out-to-ref/{rn}-{an}.log",
+        "logs/mutyper/annotate_vcf/out-to-ref/{ref}-{out}.log",
     conda:
         "../envs/mutyper.yml"
     shell:
@@ -240,10 +240,10 @@ rule annotate_vcf_out_to_ref:
 
 
 def get_mutyper_rtn(wc):
-    for an, rn in pairs:
-        if rn == "*" or an == "*" or an == "h1tg000047l":
+    for out, ref in pairs:
+        if ref == "*" or out == "*" or out == "h1tg000047l":
             continue
-        yield (rules.annotate_vcf.output.bcf).format(rn=rn, an=an)
+        yield (rules.annotate_vcf.output.bcf).format(ref=ref, out=out)
 
 
 rule annotated_vcf:
