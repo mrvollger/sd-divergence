@@ -53,8 +53,8 @@ rule make_chain:
     shell:
         """
         module load ucsc
-        grep -w {wildcards.rn} {input.psl} \
-            | grep -w {wildcards.an} \
+        grep -w {wildcards.ref} {input.psl} \
+            | grep -w {wildcards.out} \
             | pslToChain /dev/stdin {output.chain_out_to_ref}
 
         chainSwap {output.chain_out_to_ref} /dev/stdout \
@@ -99,8 +99,8 @@ rule subset_vcf:
     shell:
         """
         grep "^chain" {input.chain} \
-             | grep -w {wildcards.rn} \
-             | grep -w {wildcards.an} \
+             | grep -w {wildcards.ref} \
+             | grep -w {wildcards.out} \
              | cut -d " " -f 3,6,7 \
              | awk '{{print $1"\t"$2"\t"$3 }}' \
              | bedtools sort -i - \
@@ -130,8 +130,8 @@ rule prep_ancestor:
         "../envs/env.yml"
     shell:
         """
-        samtools faidx {input.reference} {wildcards.rn} | seqtk seq -l 60 > {output.rn}
-        samtools faidx {input.ancestor} {wildcards.an} | seqtk seq -l 60 > {output.an}
+        samtools faidx {input.reference} {wildcards.ref} | seqtk seq -l 60 > {output.rn}
+        samtools faidx {input.ancestor} {wildcards.out} | seqtk seq -l 60 > {output.an}
         samtools faidx {output.rn}
         samtools faidx {output.an}
         """
