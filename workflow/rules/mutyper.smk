@@ -92,22 +92,21 @@ rule subset_vcf:
         "../envs/env.yml"
     shell:
         """
-             grep "^chain" {input.chain} \
-                 | grep -w {wildcards.rn} \
-                 | grep -w {wildcards.an} \
-                 | cut -d " " -f 8,11,12 \
-                 | awk '{{print $1"\t"$2"\t"$3 }}' \
-                 | bedtools sort -i - \
-                 | bedtools merge -i - \
-                 > {output.rgn}
-             cat {output.rgn}
+         grep "^chain" {input.chain} \
+             | grep -w {wildcards.rn} \
+             | grep -w {wildcards.an} \
+             | cut -d " " -f 8,11,12 \
+             | awk '{{print $1"\t"$2"\t"$3 }}' \
+             | bedtools sort -i - \
+             | bedtools merge -i - \
+             > {output.rgn}
+         cat {output.rgn}
 
-             bcftools view {input.bcf} \
-                 --regions-file {output.rgn} \
-                | bcftools sort -m 8G - \
-                | bcftools +fill-tags \
-
-        #     > {output.vcf}
+        bcftools view {input.bcf} \
+             --regions-file {output.rgn} \
+            | bcftools sort -m 8G - \
+            | bcftools +fill-tags \
+        > {output.vcf}
         """
 
 
