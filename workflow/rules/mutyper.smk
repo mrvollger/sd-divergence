@@ -156,6 +156,7 @@ rule make_ancestor:
         "../envs/mutyper.yml"
     shell:
         """
+        rm {output}
         mutyper ancestor \
             --bed {input.rgn} \
             {input.bcf} \
@@ -206,6 +207,7 @@ rule make_ancestor_out_to_ref:
         "../envs/mutyper.yml"
     shell:
         """
+        rm {output}
         mutyper ancestor \
             --bed {input.rgn} \
             {input.bcf} \

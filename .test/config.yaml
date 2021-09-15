@@ -1,9 +1,10 @@
 ref: .test/reference/chm13_v1.1_plus38Y_masked.fasta
 manifest: .test/manifest.tsv
 metadata: .test/hprc_year1_sample_metadata.txt
-step_size: 100000
+step_size: 200000
 window_size: 200000
 min_syntenic_size: 1000000
+exclude: .test/exclude.bed
 annotation_files:
   SD: .test/annotation/chm13_v1.1_plus38Y.SDs.bed.gz
   Sat: .test/annotation/chm13_v1.1_plus38Y.cen.bed.gz

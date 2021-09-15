@@ -48,7 +48,8 @@ include: "rules/snv.smk"
 include: "rules/distance.smk"
 include: "rules/tables.smk"
 include: "rules/plots.smk"
-include: "rules/mutyper.smk"
+# include: "rules/mutyper.smk"
+include: "rules/trackhub.smk"
 
 
 rule all:
@@ -64,3 +65,6 @@ rule all:
         snv_table=rules.make_summary_table.output,
         plots=rules.plots.input,
         r_data=rules.make_r_data.output,
+        # making the track hub
+        bigwig=expand(rules.make_bigwig.output, sm=tbl.index, h=[1, 2]),
+        trackdb=rules.make_trackdb.output,
