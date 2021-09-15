@@ -98,7 +98,7 @@ rule add_snv_to_windows:
         "logs/snv_count_windows_{sm}_{h}.log",
     conda:
         "../envs/env.yml"
-    threads: 8
+    threads: 4
     shell:
         """
         HEADER=$(gunzip -c {input.windows} | head -n 1 || :)
