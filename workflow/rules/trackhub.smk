@@ -28,7 +28,7 @@ track = """
     parent snv_density
 	bigDataUrl SNVdensity/{sm}_{h}.bigWig
     shortLabel {sm}_{h} snv density
-    longLabel {sm}_{h} snv density in 1 kbp windows
+    longLabel ""
     visibility full
 	autoScale Off
 	maxHeightPixels 128:36:16
@@ -37,7 +37,7 @@ track = """
 	windowingFunction Mean
 	color {strong_color}
 	altColor {weak_color}
-	viewLimits 0:20
+	viewLimits 0:10
 	type bigWig 0 1000
 
 """
