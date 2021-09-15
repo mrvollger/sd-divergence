@@ -11,6 +11,18 @@ group varRep
 
 """
 
+hub = """
+hub SNV_density
+shortLabel SNV density
+longLabel SNV density of HPRC year 1 samples in 1 kbp windows
+genomesFile genomes.txt
+email mvollger.edu
+"""
+genomes = """
+genome t2t-chm13-v1.1
+trackDb trackDb.chm13.txt
+"""
+
 track = """
 	track {sm}_{h}_snv_density
     parent snv_density
@@ -57,7 +69,9 @@ rule make_trackdb:
     input:
         bigwig=expand(rules.make_bigwig.output, sm=tbl.index, h=[1, 2]),
     output:
-        track="results/trackHub/trackHub.txt",
+        track="results/trackHub/trackDb.chm13.txt",
+        hub="results/trackHub/hub.txt",
+        genomes="results/trackHub/genomes.txt",
     threads: 1
     log:
         "logs/trackHub/trackHub.log",
@@ -74,3 +88,5 @@ rule make_trackdb:
                     )
                 )
         out.close()
+        open(output.hub, "w").write(hub)
+        open(output.genomes, "w").write(genomes)
