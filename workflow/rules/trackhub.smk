@@ -25,13 +25,13 @@ trackDb trackDb.chm13.txt
 
 track = """
 	track {sm}_{h}_snv_density
-    parent snv_density
+	parent snv_density
 	bigDataUrl SNVdensity/{sm}_{h}.bigWig
-    shortLabel {sm}_{h} snv density
-    longLabel {sm}_{h}
-    visibility full
+	shortLabel {sm}_{h} snv density
+	longLabel {sm}_{h}
+	visibility full
 	autoScale Off
-	maxHeightPixels 64:36:16
+	maxHeightPixels 128:16:10
 	graphTypeDefault Bar
 	gridDefault OFF
 	windowingFunction Mean
@@ -57,8 +57,9 @@ rule make_bigwig:
         "logs/trackHub/SNVdesnisty/{sm}_{h}.bigWig.log",
     shell:
         """
-        cat {input.bed} \
-            | csvtk cut -C "$" -tT -f "#chr",start,end,num_snv  \
+        csvtk cut -C "$" -tT \
+            -f "#chr",start,end,num_snv  \
+            {input.bed} \
             > {output.bg}
 
         bedGraphToBigWig {output.bg} {input.fai} {output.bigwig}

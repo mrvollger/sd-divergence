@@ -17,6 +17,7 @@ rule clean_distance_files:
             | gzip -c > {output}
         """
 
+
 #
 # Distance for windows
 #
@@ -82,20 +83,22 @@ rule distance_windows:
             > {output}
         """
 
+
 #
 # Add SNV counts to the distance windows
 #
 rule add_snv_to_windows:
     input:
         windows=rules.distance_windows.output,
-        snv=rules.filter_snv_by_syntenic.output.snv,
+        #snv=rules.filter_snv_by_syntenic.output.snv,
+        snv="temp/snv/{sm}_{h}/dist_{sm}_{h}.bed",
     output:
-        temp("temp/add_snv/{sm}_{h}_snvs_haplotype_coverage.bed"),
+        "results/windowed_snv/{sm}_{h}_snvs_haplotype_coverage.bed.gz",
     log:
         "logs/snv_count_windows_{sm}_{h}.log",
     conda:
         "../envs/env.yml"
-    threads: 1
+    threads: 8
     shell:
         """
         HEADER=$(gunzip -c {input.windows} | head -n 1 || :)
@@ -106,11 +109,12 @@ rule add_snv_to_windows:
             | grep "{wildcards.sm}_{wildcards.h}" \
             | bedtools coverage \
                 -a - \
-                -b {input.snv} \
+                -b <(csvtk filter -C "$" -tT -f "anno_TRF<1" {input.snv}) \
                 -counts -sorted \
             | sed "s/$/\\t{wildcards.sm}_{wildcards.h}/" \
             | sed "1s/^/${{HEADER}}\\n/" \
             | csvtk cut -C "$" -tT -f -haps \
+            | pigz -p {threads} \
             > {output}
         """
 
@@ -202,8 +206,8 @@ rule distance_snv:
         echo $HEADER
 
         paste \
-            {input.snv} \
-            <(paste {input.distances} | cut -f {params.columns} ) \
+            <(grep -v "^#" {input.snv}) \
+            <(paste {input.distances} | grep -v "^#" | cut -f {params.columns} ) \
             | grep -v "^#" | sed "1s/^/${{HEADER}}\\n/" \
             > {output}
         """
