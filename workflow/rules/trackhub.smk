@@ -28,16 +28,16 @@ track = """
     parent snv_density
 	bigDataUrl SNVdensity/{sm}_{h}.bigWig
     shortLabel {sm}_{h} snv density
-    longLabel ""
+    longLabel {sm}_{h}
     visibility full
 	autoScale Off
-	maxHeightPixels 128:36:16
+	maxHeightPixels 64:36:16
 	graphTypeDefault Bar
 	gridDefault OFF
 	windowingFunction Mean
 	color {strong_color}
 	altColor {weak_color}
-	viewLimits 0:10
+	viewLimits 0:5
 	type bigWig 0 1000
 
 """
