@@ -139,6 +139,7 @@ rule long_and_filtered_windows:
         echo $HEADER
         zcat {input.snv} \
             | sort -k 1,1 -k2,2n \
+                --parallel={threads} -S {resources.mem}G \
             | grep -v "^#" \
             | sed "1s/^/${{HEADER}}\\n/" \
             | pigz -p {threads} \
