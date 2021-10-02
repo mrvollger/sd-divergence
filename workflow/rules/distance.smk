@@ -189,7 +189,7 @@ rule distance_snv:
             allow_missing=True,
         ),
     output:
-        temp("temp/snv/{sm}_{h}/dist_{sm}_{h}.bed"),
+        "results/snv/snv_{sm}_{h}.bed",
     log:
         "logs/snv/{sm}_{h}/dist_{sm}_{h}.log",
     conda:

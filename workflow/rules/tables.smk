@@ -4,7 +4,7 @@
 rule make_summary_table_per_haplotype:
     input:
         #rules.all_snv.output,
-        rules.annotate_snv.output,
+        rules.distance_snv.output,
         rules.make_combos.output,
     output:
         tbl="results/tables/{sm}_{h}/{sm}_{h}_snv_per_kbp.tbl",
