@@ -132,14 +132,14 @@ rule long_and_filtered_windows:
         names=" ".join(expand("{sm}_{h}", sm=tbl.index, h=[1, 2])),
     resources:
         mem=8,
-    threads: 8
+    threads: 40
     shell:
         """
         HEADER=$(zcat {input.snv[1]} | head -n 1 || :)
         echo $HEADER
         zcat {input.snv} \
             | sort -k 1,1 -k2,2n \
-                --parallel={threads} -S {resources.mem}G \
+                --parallel={threads} -S 80G \
             | grep -v "^#" \
             | sed "1s/^/${{HEADER}}\\n/" \
             | pigz -p {threads} \
