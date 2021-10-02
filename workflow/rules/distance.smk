@@ -209,6 +209,7 @@ rule distance_snv:
             <(grep -v "^#" {input.snv}) \
             <(paste {input.distances} | grep -v "^#" | cut -f {params.columns} ) \
             | grep -v "^#" | sed "1s/^/${{HEADER}}\\n/" \
+            | csvtk filter -C "$" -tT -f "anno_TRF<1" \
             > {output}
         """
 
