@@ -135,17 +135,18 @@ rule long_and_filtered_windows:
     threads: 8
     shell:
         """
-        HEADER=$(head -n 1 {input.snv[1]} || :)
+        HEADER=$(zcat {input.snv[1]} | head -n 1 || :)
         echo $HEADER
-
-        sort -m -k 1,1 -k2,2n \
-            --batch-size=500 --parallel {threads} \
-            {input.snv} \
+        zcat {input.snv} \
+            | sort -k 1,1 -k2,2n \
             | grep -v "^#" \
             | sed "1s/^/${{HEADER}}\\n/" \
             | pigz -p {threads} \
             > {output}
         """
+        #sort -m -k 1,1 -k2,2n \
+        #--batch-size=500 --parallel {threads} \
+        # {input.snv} \
 
 
 #
