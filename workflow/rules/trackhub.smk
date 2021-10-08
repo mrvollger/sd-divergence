@@ -109,7 +109,7 @@ rule make_trackdb:
         weak_color = "47,79,79"
         out = open(output.track, "w")
         out.write(track_db_header.format(window_size=config["window_size"]))
-        for sm in list(tbl.index) + ["all"]:
+        for sm in ["all"] + list(tbl.index):
             for h in [1, 2]:
                 if sm == "all" and h == 2:
                     continue
