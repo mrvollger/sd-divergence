@@ -80,13 +80,12 @@ rule all_bigwig:
         "logs/trackHub/SNVdesnisty/all_1.bigWig.log",
     params:
         window_size=config["window_size"],
-        step_size=config["step_size"],
     shell:
         """
         zcat {input.bed} \
             | csvtk -tT -C "$" cut -f "#chr",start,end,hap_count,num_snv \
-            | bedtools merge -i - -d -{params.step_size} -c 4,5 -o distinct,sum \
-            | awk -v OFS=$'\t' '$3-$2 >= {params.step_size} {{print $1,$2,$3,$5/$4}}' \
+            | bedtools merge -i - -d -{params.window_size} -c 4,5 -o distinct,sum \
+            | awk -v OFS=$'\t' '$3-$2 >= {params.window_size} {{print $1,$2,$3,$5/$4}}' \
         > {output.bg}
 
         bedGraphToBigWig {output.bg} {input.fai} {output.bigwig}
