@@ -90,8 +90,9 @@ rule distance_windows:
 rule add_snv_to_windows:
     input:
         windows=rules.distance_windows.output,
+        snv=rules.annotate_snv.output,
         #snv=rules.filter_snv_by_syntenic.output.snv,
-        snv="temp/snv/{sm}_{h}/dist_{sm}_{h}.bed",
+        #snv="temp/snv/{sm}_{h}/dist_{sm}_{h}.bed",
     output:
         "results/windowed_snv/{sm}_{h}_snvs_haplotype_coverage.bed.gz",
     log:
