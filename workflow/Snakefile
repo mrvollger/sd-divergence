@@ -63,6 +63,7 @@ include: "rules/trackhub.smk"
 rule all:
     input:
         expand(rules.make_summary_table_per_haplotype.output, sm=tbl.index, h=[1, 2]),
+        expand(rules.distance_snv.output, sm=tbl.index, h=[1, 2]),
         rules.small_snv.output,
         annotation_sizes_wide=rules.annotation_sizes_wide.output,
         uncallable=rules.uncallable_windows.output,
