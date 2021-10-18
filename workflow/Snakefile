@@ -17,7 +17,7 @@ fai = f"{config['ref']}.fai"
 assert os.path.exists(fai), f"{fai} not found"
 
 # df.fai = pd.read_csv(fai,sep="\t", header=None)
-if "gene-converion" in config:
+if "gene_converion" in config:
     gc_df = pd.read_csv(config["gene-converion"], sep="\t")
 else:
     sample, hap = list(zip(*itertools.product(tbl.index, ["1", "2"])))
