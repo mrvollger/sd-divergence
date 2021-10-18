@@ -28,7 +28,7 @@ if ("IGC" %in% df$region) {
     print(n_mbp)
     sd$`# SNVs` <- n_snvs
     sd$`Mbp` <- n_mbp
-    sd$`#SNVs per 10 kbp` <- n_per_10_kbp
+    sd$`# SNVs per 10 kbp` <- n_per_10_kbp
     df <- rbind(df, sd)
 }
 

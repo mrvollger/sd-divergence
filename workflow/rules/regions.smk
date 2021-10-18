@@ -138,7 +138,9 @@ rule make_combos:
     shell:
         """
         printf "hap\tanno\tsize\n" > {output}
-        cat {input.combos} | sort >> {output}
+        cat {input.combos} \
+            | sed 's/gene-conversion-.*_size/IGC_size/g' \
+            | sort >> {output}
         """
 
 
