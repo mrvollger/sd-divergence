@@ -37,7 +37,7 @@ df[region != "Unique"]$facet_row <- df[region != "Unique"]$region
 
 
 new <- sort(unique(df$region[!(df$region %in% names(COLORS))]))
-new_cols <- brewer.pal(length(new), "Spectral")
+new_cols <- brewer.pal(length(new), "RdYlBu")
 names(new_cols) <- new
 pcolors <- c(COLORS, new_cols)
 
