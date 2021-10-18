@@ -25,7 +25,6 @@ else:
         {"sample": sample, "hap": hap, "file": ".test/fake-gene-conversion.bed"}
     )
 gc_df.set_index(["sample", "hap"], inplace=True)
-print(gc_df)
 
 TEMP_DIR = config.pop("tempdir", "temp")
 if TEMP_DIR != "temp":
