@@ -27,9 +27,18 @@ rule syntenic_and_callable:
         """
 
 
+def get_annotation_file(wc):
+    if str(wc.anno).startswith("gene-conversion-"):
+        sm_hap = str(wc.anno).strip("gene-conversion-")
+        sm, h = sm_hap.split("_")
+        return gc_df.loc[(sm, h)].file
+    else:
+        return config["annotation_files"][wc.anno]
+
+
 rule clean_annotation_files:
     input:
-        annotation_file=lambda w: config["annotation_files"][w.anno],
+        annotation_file=get_annotation_file,
     output:
         temp("temp/anno/{anno}.bed.gz"),
     log:
@@ -101,10 +110,12 @@ rule size_of_combinations_of_annotation_files:
 
 def allowed_anno_combinations(wc):
     file_fmt = rules.size_of_combinations_of_annotation_files.output.tbl
-    anno = config["annotation_files"].keys()
     out = []
     for sm in tbl.index:
         for h in [1, 2]:
+            anno = list(config["annotation_files"].keys()) + [
+                f"gene-conversion-{sm}_{h}"
+            ]
             for a1 in anno:
                 for a2 in anno:
                     f = (file_fmt).format(h=h, sm=sm, anno1=a1, anno2=a2)

@@ -3,7 +3,7 @@ import sys
 import math
 import pandas as pd
 from snakemake.utils import min_version
-
+import itertools
 
 min_version("6.0")
 shell.prefix("set -eo pipefail; ")
@@ -17,7 +17,14 @@ fai = f"{config['ref']}.fai"
 assert os.path.exists(fai), f"{fai} not found"
 
 # df.fai = pd.read_csv(fai,sep="\t", header=None)
-
+if "gene-converion" in config:
+    gc_df = pd.read_csv(config["gene-converion"], sep="\t")
+else:
+    sample, hap = list(zip(*itertools.product(tbl.index, ["1", "2"])))
+    gc_df = pd.DataFrame(
+        {"sample": sample, "hap": hap, "file": ".test/fake-gene-conversion.bed"}
+    )
+gc_df.set_index(["sample", "hap"], inplace=True)
 
 TEMP_DIR = config.pop("tempdir", "temp")
 if TEMP_DIR != "temp":
@@ -39,7 +46,7 @@ assert "Unique" in config["annotation_files"].keys(), "SD annotation not found"
 wildcard_constraints:
     sm="|".join(tbl.index),
     dist="|".join(config["distance_files"].keys()),
-    anno="|".join(config["annotation_files"].keys()),
+    anno="|".join(config["annotation_files"].keys()) + "|gene-conversion-.*",
 
 
 include: "rules/regions.smk"

@@ -13,6 +13,25 @@ pop <- fread(infile2, fill = TRUE)
 df <- fread(infile) %>%
     mutate(Sample = gsub("_(1|2)", "", hap)) %>%
     merge(pop, by = "Sample", all.x = T)
+
+#
+# make calculations minus IGC
+#
+if ("IGC" %in% df$region) {
+    igc <- df[region == "IGC", ]
+    sd <- copy(df[region == "SD", ])
+    n_snvs <- sd$`# SNVs` - igc$`# SNVs`
+    n_mbp <- sd$Mbp - igc$Mbp
+    n_per_10_kbp <- 1e4 * n_snvs / (n_mbp * 1e6)
+    sd$region <- "SD-IGC"
+    print(igc)
+    print(n_mbp)
+    sd$`# SNVs` <- n_snvs
+    sd$`Mbp` <- n_mbp
+    sd$`#SNVs per 10 kbp` <- n_per_10_kbp
+    df <- rbind(df, sd)
+}
+
 df$facet_row <- "SD"
 df[region != "Unique"]$facet_row <- df[region != "Unique"]$region
 
