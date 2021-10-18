@@ -14,7 +14,7 @@ df
 wide_files <- Sys.glob("results/tables/*/*wide.tbl")
 all.files <- snakemake@input$wide
 wide_list <- lapply(wide_files, fread)
-wide_df <- rbindlist(wide_list)
+wide_df <- rbindlist(wide_list, fill = TRUE)
 wide_df
 
 
