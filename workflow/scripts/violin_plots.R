@@ -79,7 +79,7 @@ for (i in unique(df$facet_row)) {
         geom_violin(alpha = 0.5) +
         geom_jitter(width = 0.2) +
         facet_row(~Superpopulation) +
-        scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+        scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
         # facet_grid(facet_row ~ Superpopulation, scales = "free") +
         # facet_grid_paginate(facet_row ~ Superpopulation,
         # nrow = 1,
