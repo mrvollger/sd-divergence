@@ -52,7 +52,7 @@ for (i in unique(df$facet_row)) {
     print(title)
     print(i)
     p <- df %>%
-        filter(facet_row == i | region == "Unique") %>%
+        filter(facet_row == i | region == "Unique" | region == "SD") %>%
         ggplot(
             aes(
                 x = region,
