@@ -47,7 +47,7 @@ pdf(outfile, height = 5, width = 9)
 for (i in unique(df$facet_row)) {
     mbp <- round(df[df$region == i, "Mbp"], 2)
     gbp <- round(df[df$region == "Unique", "Mbp"] / 1000, 2)
-    sdmbp <- round(df[df$region == i, "Mbp"], 2)
+    sdmbp <- round(df[df$region == "SD", "Mbp"], 2)
     title <- glue("Mbp of {i} considered {min(mbp)} - {max(mbp)} \n")
     subtitle <- glue("Mbp of SD considered {min(sdmbp)} - {max(sdmbp)}\n")
     subsub <- glue("Gbp of unique considered {min(gbp)} - {max(gbp)}")
@@ -56,13 +56,14 @@ for (i in unique(df$facet_row)) {
     title <- paste(title, subtitle, subsub, sep = "\n")
 
     tdf <- df %>%
-        filter(facet_row == i | region == "Unique" | region == "SD")
+        filter(facet_row == i | region == "Unique" | region == "SD") %>%
+        mutate(region = factor(region, levels = unique(c(i, "SD", "Unique"))))
 
     sumdf <- tdf %>%
         mutate(y = 0.9 * min(`# SNVs per 10 kbp`)) %>%
         group_by(region, Superpopulation, y) %>%
         summarize(
-            label = round(mean(`# SNVs per 10 kbp`), 1)
+            label = round(median(`# SNVs per 10 kbp`), 1)
         )
 
     p <- tdf %>%
@@ -74,10 +75,11 @@ for (i in unique(df$facet_row)) {
                 fill = region
             )
         ) +
-        geom_text_repel(data = sumdf, aes(label = label, y = y)) +
+        geom_text(data = sumdf, aes(label = label, y = y)) +
         geom_violin(alpha = 0.5) +
         geom_jitter(width = 0.2) +
         facet_row(~Superpopulation) +
+        scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
         # facet_grid(facet_row ~ Superpopulation, scales = "free") +
         # facet_grid_paginate(facet_row ~ Superpopulation,
         # nrow = 1,
