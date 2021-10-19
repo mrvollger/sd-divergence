@@ -47,19 +47,34 @@ pdf(outfile, height = 5, width = 9)
 for (i in unique(df$facet_row)) {
     mbp <- round(df[df$region == i, "Mbp"], 2)
     gbp <- round(df[df$region == "Unique", "Mbp"] / 1000, 2)
+    sdmbp <- round(df[df$region == i, "Mbp"], 2)
     title <- glue("Mbp of {i} considered {min(mbp)} - {max(mbp)} \n")
-    subtitle <- glue("Gbp of unique considered {round(min(gbp),2)} - {round(max(gbp),2)}")
+    subtitle <- glue("Mbp of SD considered {min(sdmbp)} - {max(sdmbp)}\n")
+    subsub <- glue("Gbp of unique considered {min(gbp)} - {max(gbp)}")
     print(title)
     print(i)
-    p <- df %>%
-        filter(facet_row == i | region == "Unique" | region == "SD") %>%
+    title <- paste(title, subtitle, subsub, sep = "\n")
+
+    tdf <- df %>%
+        filter(facet_row == i | region == "Unique" | region == "SD")
+
+    sumdf <- tdf %>%
+        mutate(y = 0.9 * min(`# SNVs per 10 kbp`)) %>%
+        group_by(region, Superpopulation, y) %>%
+        summarize(
+            label = round(mean(`# SNVs per 10 kbp`), 1)
+        )
+
+    p <- tdf %>%
         ggplot(
             aes(
                 x = region,
-                y = `# SNVs per 10 kbp`, color = region,
+                y = `# SNVs per 10 kbp`,
+                color = region,
                 fill = region
             )
         ) +
+        geom_text_repel(data = sumdf, aes(label = label, y = y)) +
         geom_violin(alpha = 0.5) +
         geom_jitter(width = 0.2) +
         facet_row(~Superpopulation) +
@@ -71,7 +86,7 @@ for (i in unique(df$facet_row)) {
         # page = i,
         # scales = "free"
         # ) +
-        ggtitle("", subtitle = paste(title, subtitle, sep = "\n")) +
+        ggtitle("", subtitle = title) +
         scale_fill_manual(values = pcolors) +
         scale_color_manual(values = pcolors) +
         theme_minimal_hgrid() +
