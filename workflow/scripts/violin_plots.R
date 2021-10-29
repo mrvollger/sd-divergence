@@ -11,6 +11,7 @@ outfile <- snakemake@output[[1]]
 pop <- fread(infile2, fill = TRUE)
 
 df <- fread(infile) %>%
+    filter(hap != "CHM1_2") %>%
     mutate(Sample = gsub("_(1|2)", "", hap)) %>%
     merge(pop, by = "Sample", all.x = T)
 
@@ -24,8 +25,6 @@ if ("IGC" %in% df$region) {
     n_mbp <- sd$Mbp - igc$Mbp
     n_per_10_kbp <- 1e4 * n_snvs / (n_mbp * 1e6)
     sd$region <- "SD-IGC"
-    print(igc)
-    print(n_mbp)
     sd$`# SNVs` <- n_snvs
     sd$`Mbp` <- n_mbp
     sd$`# SNVs per 10 kbp` <- n_per_10_kbp
@@ -92,6 +91,7 @@ for (i in unique(df$facet_row)) {
         geom_text_repel(
             data = tdf %>% filter(Sample == "CHM1"),
             aes(label = Sample),
+            nudge_y = 5,
         ) +
         geom_violin(alpha = 0.5) +
         geom_jitter(width = 0.2) +
