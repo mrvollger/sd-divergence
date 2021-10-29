@@ -93,6 +93,7 @@ for (i in unique(df$facet_row)) {
             aes(label = Sample),
             nudge_y = 3,
             nudge_x = -1,
+            arrow = arrow(length = unit(0.015, "npc")),
         ) +
         geom_violin(alpha = 0.5) +
         geom_jitter(width = 0.2) +
