@@ -89,7 +89,7 @@ for (i in unique(df$facet_row)) {
             )
         ) +
         geom_text(data = sumdf, aes(label = label, y = y)) +
-        geom_repel_text(
+        geom_text_repel(
             data = tdf %>% filter(Sample == "CHM1"),
             aes(label = Sample),
         ) +
