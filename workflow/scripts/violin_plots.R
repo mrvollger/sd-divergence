@@ -90,10 +90,14 @@ for (i in unique(df$facet_row)) {
         geom_text(data = sumdf, aes(label = label, y = y)) +
         geom_text_repel(
             data = tdf %>% filter(Sample == "CHM1"),
-            aes(label = Sample),
+            aes(
+                label = Sample,
+                x = region,
+                y = `# SNVs per 10 kbp`,
+            ),
             color = "black",
-            nudge_y = 3,
-            nudge_x = -2,
+            nudge_y = 2,
+            nudge_x = -1,
             arrow = arrow(length = unit(0.015, "npc")),
         ) +
         geom_violin(alpha = 0.5) +
