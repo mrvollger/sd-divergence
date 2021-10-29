@@ -89,6 +89,10 @@ for (i in unique(df$facet_row)) {
             )
         ) +
         geom_text(data = sumdf, aes(label = label, y = y)) +
+        geom_repel_text(
+            data = tdf %>% filter(Sample == "CHM1"),
+            aes(label = Sample),
+        ) +
         geom_violin(alpha = 0.5) +
         geom_jitter(width = 0.2) +
         facet_row(~Superpopulation) +
