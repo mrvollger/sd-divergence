@@ -91,8 +91,8 @@ for (i in unique(df$facet_row)) {
         geom_text_repel(
             data = tdf %>% filter(Sample == "CHM1"),
             aes(label = Sample),
-            nudge_y = 2,
-            nudge_x = -0.5,
+            nudge_y = 3,
+            nudge_x = -1,
         ) +
         geom_violin(alpha = 0.5) +
         geom_jitter(width = 0.2) +
