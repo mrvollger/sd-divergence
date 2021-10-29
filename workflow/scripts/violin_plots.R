@@ -101,7 +101,7 @@ for (i in unique(df$facet_row)) {
             arrow = arrow(length = unit(0.015, "npc")),
         ) +
         geom_violin(alpha = 0.5) +
-        geom_jitter(width = 0.2) +
+        geom_jitter(width = 0.2, alpha = 0.75) +
         facet_row(~Superpopulation) +
         scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
         # facet_grid(facet_row ~ Superpopulation, scales = "free") +
