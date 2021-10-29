@@ -96,7 +96,7 @@ for (i in unique(df$facet_row)) {
                 y = `# SNVs per 10 kbp`,
             ),
             color = "black",
-            nudge_y = 2,
+            direction = "x",
             nudge_x = -1,
             arrow = arrow(length = unit(0.015, "npc")),
         ) +
