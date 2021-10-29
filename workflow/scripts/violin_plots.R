@@ -31,6 +31,19 @@ if ("IGC" %in% df$region) {
     sd$`# SNVs per 10 kbp` <- n_per_10_kbp
     df <- rbind(df, sd)
 }
+if ("Acrocentric" %in% df$region) {
+    acro <- df[region == "Acrocentric", ]
+    sd <- copy(df[region == "SD", ])
+    n_snvs <- sd$`# SNVs` - acro$`# SNVs`
+    n_mbp <- sd$Mbp - acro$Mbp
+    n_per_10_kbp <- 1e4 * n_snvs / (n_mbp * 1e6)
+    sd$region <- "SD-Acrocentric"
+    sd$`# SNVs` <- n_snvs
+    sd$`Mbp` <- n_mbp
+    sd$`# SNVs per 10 kbp` <- n_per_10_kbp
+    df <- rbind(df, sd)
+}
+
 
 df$facet_row <- "SD"
 df[region != "Unique"]$facet_row <- df[region != "Unique"]$region
