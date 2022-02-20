@@ -16,4 +16,5 @@ df.loc[(df["HAP"] == "h1") & (df["GT"] == "1|1"), "GT"] = "1|."
 df.loc[(df["HAP"] == "h2") & (df["GT"] == "1|1"), "GT"] = ".|1"
 
 df["SAMPLE"] = snakemake.wildcards.sm
+print(df.shape)
 df.to_csv(snakemake.output.snv, sep="\t", compression="gzip", index=False)
