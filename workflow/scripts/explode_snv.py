@@ -1,6 +1,7 @@
 import pandas as pd
 
 df = pd.read_csv(snakemake.input.bed, sep="\t", low_memory=False)
+df = df[(df["TYPE"] == "SNV") | (df["TYPE"] == "SNP")]
 df = df.astype(str)
 df = (
     df.apply(lambda col: col.str.split(";").explode())
