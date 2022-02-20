@@ -19,8 +19,7 @@ rule syntenic_and_callable:
         """
         #bedtools intersect -a {input.callable} \
         #    -b <( bedtools sort -i {input.aln} | awk '$3 - $2 >= {params.min_syntenic_size}' ) 
-        cat {input.callable} \
-            | bedtools intersect -header -v -a - -b {input.exclude} \
+        bedtools intersect -header -v -a {input.callable} -b {input.exclude} \
             | bedtools sort -i - \
             | bedtools merge -i - \
             | sed 's/$/\\t{wildcards.sm}_{wildcards.h}/g' \
