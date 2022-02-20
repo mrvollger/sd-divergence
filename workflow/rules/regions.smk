@@ -17,8 +17,9 @@ rule syntenic_and_callable:
     threads: 1
     shell:
         """
-        bedtools intersect -a {input.callable} \
-            -b <( bedtools sort -i {input.aln} | awk '$3 - $2 >= {params.min_syntenic_size}' ) \
+        #bedtools intersect -a {input.callable} \
+        #    -b <( bedtools sort -i {input.aln} | awk '$3 - $2 >= {params.min_syntenic_size}' ) 
+        cat {input.callable} \
             | bedtools intersect -header -v -a - -b {input.exclude} \
             | bedtools sort -i - \
             | bedtools merge -i - \
