@@ -27,7 +27,7 @@ rule filter_snv_by_syntenic:
     shell:
         """
         gunzip -c {input.snv} \
-            | awk -F$'\\t' -v pat="h{wildcards.h}|HAP" '$15 ~ pat' \
+            | awk -F$'\\t' -v pat="h{wildcards.h}|HAP" '$9 ~ pat' \
             | bedtools intersect -u \
                 -a - \
                 -b <(gunzip -c {input.callable}) \
@@ -76,7 +76,10 @@ rule annotate_snv:
         "../envs/env.yml"
     params:
         annotation_names="\t".join(
-            [f"anno_{key}" for key in list(config["annotation_files"].keys()) + ["IGC"]]
+            [
+                f"anno_{key}"
+                for key in list(config["annotation_files"].keys()) + ["IGC"]
+            ]
         ),
     threads: 1
     shell:
