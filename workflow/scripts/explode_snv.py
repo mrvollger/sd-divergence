@@ -2,7 +2,7 @@ import pandas as pd
 
 df = pd.read_csv(snakemake.input.bed, sep="\t", low_memory=False)
 print(df.shape)
-df = df[(df["TYPE"] == "SNV") | (df["TYPE"] == "SNP")]
+df = df[((df["TYPE"] == "SNV") | (df["TYPE"] == "SNP")) & (df["#CHROM"] != "chrY")]
 print(df.shape)
 
 df = df.astype(str)
