@@ -8,6 +8,8 @@ rule explode_snv:
     conda:
         "../envs/env.yml"
     threads: 1
+    resources:
+        load=100,
     script:
         "../scripts/explode_snv.py"
 
