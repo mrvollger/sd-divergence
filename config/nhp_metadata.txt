@@ -1,0 +1,4 @@
+Sample	Cohort	Sex	FamilyID	Subpopulation	Superpopulation	Notes
+Clint_PTR	NHP	Male	1	NHP	NHP	*
+hg38	GRCh38	Female	2	GRCh38	GRCh38	*
+Mhudiblu_PPA	NHP	FEMALE	3	NHP	NHP	*

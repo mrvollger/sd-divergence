@@ -1,0 +1,23 @@
+ref: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/SEDEF/chm13_v1.1_plus38Y_masked.fasta
+manifest: config/nhp_manifest.tsv
+metadata: config/nhp_metadata.txt
+window_size: 1000
+step_size: 1000
+min_syntenic_size: 1000000
+exclude: config/annotations/exclude_no_Y.bed
+annotation_files:
+  Sat: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/SEDEF/chm13_v1.1_plus38Y.cen.bed
+  SD: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/SEDEF/chm13_v1.1_plus38Y.SDs.bed
+  Unique: config/annotations/unique.bed
+  Exons: config/annotations/cds.bed
+  InterGenicSD: config/annotations/intergenic_sd.bed
+  InterGenicUnique: config/annotations/intergenic_unique.bed
+  TRF: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/Masked/chm13_v1.1_plus38Y_trf.bed
+  RM: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/Masked/chm13_v1.1_plus38Y_repeatmasker.out.bed
+distance_files:
+  SD: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/SEDEF/chm13_v1.1_plus38Y.SDs.bed
+  Unique: config/annotations/unique.bed
+  TSS: config/annotations/tss.bed
+  Exons: config/annotations/cds.bed
+  InterGenicSD: config/annotations/intergenic_sd.bed
+  InterGenicUnique: config/annotations/intergenic_unique.bed

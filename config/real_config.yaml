@@ -1,0 +1,33 @@
+ref: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/SEDEF/chm13_v1.1_plus38Y_masked.fasta
+manifest: config/manifest_pav_2022-02-19.tsv
+#manifest: config/manifest.tsv
+metadata: config/hprc_year1_sample_metadata.txt
+window_size: 1000
+step_size: 1000
+min_syntenic_size: 1000000
+gene_conversion: config/acceptor_manifest_table.tsv 
+exclude: config/annotations/exclude_no_Y.bed
+annotation_files:
+  Sat: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/SEDEF/chm13_v1.1_plus38Y.cen.bed
+  SD: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/SEDEF/chm13_v1.1_plus38Y.SDs.bed
+  Unique: config/annotations/unique.bed
+  Exons: config/annotations/cds.bed
+  InterGenicSD: config/annotations/intergenic_sd.bed
+  InterGenicUnique: config/annotations/intergenic_unique.bed
+  TRF: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/Masked/chm13_v1.1_plus38Y_trf.bed
+  RM: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/Masked/chm13_v1.1_plus38Y_repeatmasker.out.bed
+  Acrocentric: /net/eichler/vol26/projects/chm13_t2t/nobackups/sd-divergence/config/annotations/chm13.draft_v1.1.acro_p_arms.bed
+  MergedIGC: config/merged_acceptor_gene_conversion_windows.bed
+  SDIGC: mutyper_workflow/rerun_without_igc_sites_2022-05-26/config/annotations/SD_igc.bed
+  SDnoIGC: mutyper_workflow/rerun_without_igc_sites_2022-05-26/config/annotations/SD_no_igc.bed
+  HERV: config/annotations/HERV.bed
+  L1: config/annotations/L1.bed
+  Alu: config/annotations/Alu.bed
+  AncientSDs: config/annotations/AncientSDs.bed 
+distance_files:
+  SD: /net/eichler/vol26/projects/chm13_t2t/nobackups/Assembly_analysis/SEDEF/chm13_v1.1_plus38Y.SDs.bed
+  Unique: config/annotations/unique.bed
+  TSS: config/annotations/tss.bed
+  Exons: config/annotations/cds.bed
+  InterGenicSD: config/annotations/intergenic_sd.bed
+  InterGenicUnique: config/annotations/intergenic_unique.bed
