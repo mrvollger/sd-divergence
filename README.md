@@ -1,4 +1,5 @@
 # SD divergence analysis for Vollger et al., 2023
+[![DOI](https://zenodo.org/badge/385672790.svg)](https://zenodo.org/badge/latestdoi/385672790)
 
 This is a snakemake for analyzing variants from assemblies aligned to CHM13 v1.1. 
 
